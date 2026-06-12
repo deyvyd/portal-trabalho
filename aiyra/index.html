@@ -20,9 +20,7 @@
 
 <div class="page">
   <nav>
-    <div class="nav-brand" id="nav-brand">
-      ferramentas<span class="nav-dot"></span><span>deyvyd moura</span>
-    </div>
+    <div class="nav-brand" id="nav-brand"></div>
     <div class="lang-toggle" id="lang-toggle"></div>
   </nav>
 
@@ -86,6 +84,7 @@
       toolReportDesc: 'Relatório de sustentação',
       toolChamadosDesc: 'Gestão de chamados',
       toolDevsecopsDesc: 'Segurança e operações',
+      navBrand: 'ferramentas',
     },
     en: {
       title: 'Tools that<br><span class="grad">accelerate the work.</span>',
@@ -98,6 +97,7 @@
       toolReportDesc: 'Support report',
       toolChamadosDesc: 'Ticket management',
       toolDevsecopsDesc: 'Security and operations',
+      navBrand: 'tools',
     }
   };
 
@@ -122,6 +122,8 @@
     document.getElementById('tool-report-desc').textContent = t.toolReportDesc;
     document.getElementById('tool-chamados-desc').textContent = t.toolChamadosDesc;
     document.getElementById('tool-devsecops-desc').textContent = t.toolDevsecopsDesc;
+    document.getElementById('nav-brand').innerHTML =
+      t.navBrand + '<span class="nav-dot"></span><span>deyvyd moura</span>';
 
     var otherLang = lang === 'pt' ? 'en' : 'pt';
     var otherHost = lang === 'pt' ? EN_HOST : PT_HOST;
