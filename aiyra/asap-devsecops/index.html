@@ -72,9 +72,12 @@
       /* Portal nav */
       .portal-nav {
         position: relative; z-index: 10;
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 18px 28px;
         border-bottom: 1px solid rgba(255,255,255,.05);
+      }
+      .portal-nav-inner {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 16px;
+        max-width: 80rem; margin: 0 auto;
       }
       .portal-brand {
         font-size: 10px; font-weight: 700; letter-spacing: 2px;
@@ -95,9 +98,13 @@
       /* Portal footer */
       .portal-footer {
         position: relative; z-index: 1;
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 20px 28px; margin-top: 64px;
         border-top: 1px solid rgba(255,255,255,.04);
+        margin-top: 64px;
+      }
+      .portal-footer-inner {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 20px 16px;
+        max-width: 80rem; margin: 0 auto;
       }
       .portal-footer-name { font-size: 11px; color: #64748b; letter-spacing: 1px; }
       .portal-footer-dot {
@@ -266,9 +273,11 @@
 
     <!-- Portal nav -->
     <nav class="portal-nav">
-      <a href="/aiyra/" class="portal-back">← Aiyra</a>
-      <div class="portal-brand">
-        trabalho<span class="portal-nav-dot"></span><span class="portal-brand-accent">deyvyd moura</span>
+      <div class="portal-nav-inner">
+        <a href="/aiyra/" class="portal-back">← Aiyra</a>
+        <div class="portal-brand">
+          trabalho<span class="portal-nav-dot"></span><span class="portal-brand-accent">deyvyd moura</span>
+        </div>
       </div>
     </nav>
 
@@ -445,9 +454,11 @@
 
     <!-- Portal footer -->
     <footer class="portal-footer">
-      <span class="portal-footer-name">Deyvyd Moura</span>
-      <div class="portal-footer-dot"></div>
-      <span class="portal-footer-name">2026</span>
+      <div class="portal-footer-inner">
+        <span class="portal-footer-name">Deyvyd Moura</span>
+        <div class="portal-footer-dot"></div>
+        <span class="portal-footer-name">2026</span>
+      </div>
     </footer>
 
     <script>
