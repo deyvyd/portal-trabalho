@@ -1,27 +1,562 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASAP DevSecOps — Aiyra</title>
-<link rel="stylesheet" href="../../assets/style.css">
-</head>
-<body>
-<div class="blob-1"></div>
-<div class="blob-2"></div>
-<div class="page">
-  <nav>
-    <div class="nav-brand">
-      trabalho<span class="nav-dot"></span><span>deyvyd</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASAP DevSecOps — Aiyra</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+      :root {
+        --accent:      #34d399;
+        --accent-dim:  rgba(52,211,153,.12);
+        --accent-glow: rgba(52,211,153,.08);
+        --bg:          #080b14;
+        --surface:     rgba(255,255,255,.03);
+        --surface-2:   rgba(255,255,255,.05);
+        --border:      rgba(255,255,255,.07);
+        --border-acc:  rgba(52,211,153,.2);
+        --text:        #e2e8f0;
+        --muted:       #94a3b8;
+        --dim:         #475569;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        min-height: 100vh;
+      }
+
+      /* Noise */
+      body::before {
+        content: '';
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      }
+
+      /* Blobs */
+      .blob-1 {
+        position: fixed; top: -120px; right: -120px;
+        width: 500px; height: 500px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(52,211,153,.07) 0%, transparent 70%);
+        pointer-events: none; z-index: 0;
+      }
+      .blob-2 {
+        position: fixed; bottom: -100px; left: -100px;
+        width: 400px; height: 400px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(167,139,250,.08) 0%, transparent 70%);
+        pointer-events: none; z-index: 0;
+      }
+
+      /* Portal nav */
+      .portal-nav {
+        position: relative; z-index: 10;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 28px;
+        border-bottom: 1px solid rgba(255,255,255,.05);
+      }
+      .portal-brand {
+        font-size: 10px; font-weight: 700; letter-spacing: 2px;
+        text-transform: uppercase; color: #475569;
+      }
+      .portal-brand-accent { color: #a78bfa; }
+      .portal-nav-dot {
+        display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+        background: linear-gradient(135deg, #a78bfa, #22d3ee);
+        margin: 0 5px; vertical-align: middle;
+      }
+      .portal-back {
+        font-size: 11px; color: #334155; text-decoration: none;
+        letter-spacing: .5px; transition: color .2s;
+      }
+      .portal-back:hover { color: var(--accent); }
+
+      /* Portal footer */
+      .portal-footer {
+        position: relative; z-index: 1;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 20px 28px; margin-top: 40px;
+        border-top: 1px solid rgba(255,255,255,.04);
+      }
+      .portal-footer-name { font-size: 11px; color: #1e293b; letter-spacing: 1px; }
+      .portal-footer-dot {
+        width: 4px; height: 4px; border-radius: 50%;
+        background: linear-gradient(135deg, #a78bfa, #22d3ee);
+      }
+
+      /* Tool hero */
+      .tool-hero { padding: 32px 28px 0; }
+      .tool-badge-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--accent-dim);
+        border: 1px solid var(--border-acc);
+        border-radius: 20px; padding: 3px 12px;
+        margin-bottom: 14px;
+        font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+        color: var(--accent); text-transform: uppercase;
+      }
+      .badge-dot {
+        width: 5px; height: 5px; border-radius: 50%;
+        background: var(--accent); animation: badge-pulse 2s infinite;
+        flex-shrink: 0;
+      }
+      @keyframes badge-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+      .tool-hero-title {
+        font-size: 2rem; font-weight: 900; color: var(--text);
+        margin-bottom: 6px; line-height: 1.1;
+      }
+      .tool-hero-title .accent { color: var(--accent); }
+      .tool-hero-subtitle { font-size: 13px; color: var(--dim); margin-bottom: 32px; }
+
+      /* App wrapper */
+      #app { position: relative; z-index: 1; }
+
+      /* ── Tailwind color overrides ── */
+
+      .bg-gray-900 { background-color: var(--bg) !important; }
+
+      .bg-gray-800 {
+        background: rgba(10,15,28,.9) !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: 0 4px 32px rgba(0,0,0,.35) !important;
+      }
+      .hover\:bg-gray-750:hover,
+      .hover\:bg-gray-650:hover { background: rgba(52,211,153,.04) !important; }
+
+      .bg-gray-700 {
+        background: var(--surface-2) !important;
+        border-radius: 8px !important;
+      }
+      .bg-gray-700.cursor-pointer:hover {
+        background: rgba(52,211,153,.08) !important;
+      }
+      .bg-gray-600 {
+        background: rgba(255,255,255,.07) !important;
+        border-radius: 6px !important;
+      }
+      .bg-gray-600:hover,
+      .hover\:bg-gray-600:hover { background: rgba(52,211,153,.09) !important; }
+      .hover\:bg-gray-500:hover { background: rgba(52,211,153,.12) !important; }
+
+      /* Text */
+      .text-gray-100 { color: #e2e8f0 !important; }
+      .text-gray-200 { color: #cbd5e1 !important; }
+      .text-gray-300 { color: #94a3b8 !important; }
+      .text-gray-400 { color: #475569 !important; }
+
+      .border-gray-600 { border-color: rgba(255,255,255,.09) !important; }
+
+      /* Inputs & selects */
+      input[type="text"],
+      input[type="url"],
+      input[type="date"],
+      select {
+        background: rgba(255,255,255,.04) !important;
+        border: 1px solid rgba(255,255,255,.09) !important;
+        color: #e2e8f0 !important;
+        border-radius: 8px !important;
+        transition: border-color .2s, box-shadow .2s !important;
+        font-family: 'Segoe UI', system-ui !important;
+      }
+      input[type="text"]:focus,
+      input[type="url"]:focus,
+      input[type="date"]:focus,
+      select:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(52,211,153,.12) !important;
+        outline: none !important;
+        background: rgba(255,255,255,.06) !important;
+      }
+      input::placeholder { color: #334155 !important; }
+      select option { background: #0d1424; color: #e2e8f0; }
+
+      /* Primary action button */
+      .bg-blue-600 {
+        background: linear-gradient(90deg, var(--accent), #22d3ee) !important;
+        color: #080b14 !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 800 !important;
+        letter-spacing: .03em !important;
+        transition: opacity .2s, transform .15s !important;
+      }
+      .bg-blue-600:hover,
+      .hover\:bg-blue-700:hover {
+        opacity: .9 !important;
+        transform: translateY(-1px) !important;
+        background: linear-gradient(90deg, var(--accent), #22d3ee) !important;
+      }
+
+      /* Date nav buttons */
+      .bg-blue-900 {
+        background: rgba(52,211,153,.12) !important;
+        border-radius: 4px !important;
+        color: var(--accent) !important;
+      }
+      .hover\:bg-blue-800:hover { background: rgba(52,211,153,.22) !important; }
+
+      .hover\:text-blue-300:hover { color: var(--accent) !important; }
+
+      /* Accordion section headers */
+      .p-4.cursor-pointer { transition: background .15s !important; }
+
+      /* Section icons */
+      .text-orange-500 { color: #fb923c !important; }
+      .text-purple-500 { color: var(--accent) !important; }
+
+      /* Label pills */
+      .bg-yellow-600  { background: rgba(245,158,11,.18) !important;  color: #fbbf24 !important; border-radius: 6px !important; }
+      .bg-red-700     { background: rgba(185,28,28,.25) !important;   color: #fca5a5 !important; border-radius: 4px !important; }
+      .bg-yellow-600  { background: rgba(202,138,4,.25) !important;   color: #fde047 !important; border-radius: 4px !important; }
+      .bg-blue-700    { background: rgba(29,78,216,.25) !important;   color: #93c5fd !important; border-radius: 4px !important; }
+      .bg-gray-600    { background: rgba(75,85,99,.25) !important;    color: #d1d5db !important; border-radius: 4px !important; }
+      .bg-gray-500    { background: rgba(100,116,139,.18) !important; color: #94a3b8 !important; border-radius: 6px !important; }
+
+      /* Priority flag colors */
+      .text-red-500    { color: #f87171 !important; }
+      .text-yellow-500 { color: #fbbf24 !important; }
+      .text-blue-500   { color: var(--accent) !important; }
+      .text-gray-500   { color: #64748b !important; }
+
+      /* Date picker */
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(.5); cursor: pointer;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: rgba(255,255,255,.02); }
+      ::-webkit-scrollbar-thumb { background: rgba(52,211,153,.25); border-radius: 3px; }
+    </style>
+  </head>
+  <body>
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <!-- Portal nav -->
+    <nav class="portal-nav">
+      <a href="/aiyra/" class="portal-back">← Aiyra</a>
+      <div class="portal-brand">
+        trabalho<span class="portal-nav-dot"></span><span class="portal-brand-accent">deyvyd</span>
+      </div>
+    </nav>
+
+    <!-- Tool hero (outside Vue app) -->
+    <div class="tool-hero">
+      <div class="tool-badge-pill"><span class="badge-dot"></span>Aiyra · ASAP</div>
+      <h1 class="tool-hero-title">🔒 <span class="accent">DevSecOps</span></h1>
+      <p class="tool-hero-subtitle">Gerador de dados para Gitlab · ClickUp — Pipelines &amp; Vulnerabilidades</p>
     </div>
-  </nav>
-  <a href="/aiyra/" class="back-link">← Voltar</a>
-  <div class="hero-label" style="margin-bottom:16px">
-    <div class="dot"></div>
-    <span>Aiyra</span>
-  </div>
-  <h1 class="placeholder-title"><span class="grad">ASAP DevSecOps</span></h1>
-  <p class="placeholder-desc">Segurança e operações. Em breve.</p>
-</div>
-</body>
+
+    <div id="app" class="min-h-screen py-4 px-4 pb-0">
+      <div class="max-w-7xl mx-auto">
+
+        <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Tipo</label>
+                <select v-model="form.tipo" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Selecione...</option>
+                  <option value="Pipeline">Pipeline</option>
+                  <option value="Vulnerabilidades">Vulnerabilidades</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Sistema</label>
+                <input v-model="form.sistema" type="text" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-sm font-medium text-gray-300">Data Recebimento</label>
+                  <div class="flex items-center gap-2">
+                    <button @click.prevent="ajustarData('dataRecebimento', -1)" class="text-xs text-gray-400 hover:text-gray-300 font-bold w-5 h-5 flex items-center justify-center bg-blue-900 rounded hover:bg-blue-800">-</button>
+                    <button @click.prevent="preencherDataHoje('dataRecebimento')" class="text-xs text-gray-400 hover:text-blue-300 hover:underline">Hoje</button>
+                  </div>
+                </div>
+                <input v-model="form.dataRecebimento" type="date" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Prioridade *</label>
+                <select v-model="form.prioridade" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Selecione...</option>
+                  <option value="Urgente">Urgente</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Média">Média</option>
+                  <option value="Baixa">Baixa</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Título Jira</label>
+                <input v-model="form.tituloJira" type="text" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Título Logap</label>
+                <input v-model="form.tituloLogap" type="text" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Link Jira *</label>
+                <input v-model="form.linkJira" type="url" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Link Gitlab</label>
+                <input v-model="form.linkGitlab" type="url" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button @click="processar" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+                <i class="fas fa-magic mr-2"></i>Processar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="processado" class="space-y-6">
+          <!-- Gitlab -->
+          <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div @click="toggleGrupo('gitlab')" class="flex items-center justify-between p-4 cursor-pointer bg-gray-700 hover:bg-gray-650">
+              <div class="flex items-center gap-3">
+                <i class="fab fa-gitlab text-orange-500 text-xl"></i>
+                <h3 class="text-lg font-semibold text-gray-100">Gitlab</h3>
+              </div>
+              <i class="fas" :class="grupoExpandido === 'gitlab' ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </div>
+            <div v-if="grupoExpandido === 'gitlab'" class="p-4 space-y-4">
+              <div @click="copiarItem(resultado.gitlab.titulo)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Título:</span>
+                <p class="text-gray-300">{{ resultado.gitlab.titulo }}</p>
+              </div>
+              <div class="bg-gray-700 p-3 rounded">
+                <span class="font-semibold text-gray-200 block mb-2">Labels:</span>
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    v-for="(label, index) in resultado.gitlab.labels" :key="index"
+                    @click.stop="copiarItem(label)"
+                    class="inline-flex rounded-full overflow-hidden text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                    :style="{ border: '2px solid ' + getLabelBorderColor(label) }"
+                    style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"
+                  >
+                    <span class="px-1 pb-0.5 font-medium" :class="getLabelLeftClass(label)">{{ label.split(' → ')[0] }}</span>
+                    <span class="px-1 pb-0.5" :style="{ backgroundColor: '#0B0A10', color: '#F0F0F0' }">{{ label.split(' → ')[1] }}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clickup -->
+          <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div @click="toggleGrupo('clickup')" class="flex items-center justify-between p-4 cursor-pointer bg-gray-700 hover:bg-gray-650">
+              <div class="flex items-center gap-3">
+                <i class="fas fa-tasks text-purple-500 text-xl"></i>
+                <h3 class="text-lg font-semibold text-gray-100">Clickup</h3>
+              </div>
+              <i class="fas" :class="grupoExpandido === 'clickup' ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </div>
+            <div v-if="grupoExpandido === 'clickup'" class="p-4 space-y-4">
+              <div @click="copiarItem(resultado.clickup.titulo)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Título:</span>
+                <p class="text-gray-300">{{ resultado.clickup.titulo }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.descricao.replace(/<strong>/g, '').replace(/<\/strong>/g, ''))" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Descrição:</span>
+                <div class="text-gray-300" v-html="resultado.clickup.descricao.replace(/\n/g, '<br>')"></div>
+              </div>
+              <div v-if="resultado.clickup.linkGitlab" @click="copiarItem(resultado.clickup.linkGitlab)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Link Gitlab:</span>
+                <p class="text-gray-300">{{ resultado.clickup.linkGitlab }}</p>
+              </div>
+              <div v-if="resultado.clickup.linkJira" @click="copiarItem(resultado.clickup.linkJira)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Link Jira:</span>
+                <p class="text-gray-300">{{ resultado.clickup.linkJira }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.responsaveis.join('\n'))" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Responsáveis:</span>
+                <div class="text-gray-300">
+                  <div v-for="resp in resultado.clickup.responsaveis" :key="resp">{{ resp }}</div>
+                </div>
+              </div>
+              <div v-if="resultado.clickup.datas.dataRecebimento" @click="copiarItem(resultado.clickup.datas.dataRecebimento)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Data inicial:</span>
+                <p class="text-gray-300">{{ resultado.clickup.datas.dataRecebimento }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.prioridade)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Prioridade:</span>
+                <p class="text-gray-300 flex items-center gap-2">
+                  <i class="fa-solid fa-flag" :class="getPrioridadeColor(resultado.clickup.prioridade)"></i>{{ resultado.clickup.prioridade }}
+                </p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.analista)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Analista:</span>
+                <p class="text-gray-300">{{ resultado.clickup.analista }}</p>
+              </div>
+              <div class="bg-gray-700 p-3 rounded">
+                <span class="font-semibold text-gray-200 block mb-2">Subtarefas:</span>
+                <div class="space-y-2">
+                  <div @click.stop="copiarItem(resultado.clickup.tarefaImplementar)" class="p-2 bg-gray-600 rounded text-gray-300 cursor-pointer hover:bg-gray-500 transition-colors">
+                    {{ resultado.clickup.tarefaImplementar }}
+                  </div>
+                  <div @click.stop="copiarItem(resultado.clickup.tarefaTestar)" class="p-2 bg-gray-600 rounded text-gray-300 cursor-pointer hover:bg-gray-500 transition-colors">
+                    {{ resultado.clickup.tarefaTestar }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Portal footer -->
+    <footer class="portal-footer">
+      <span class="portal-footer-name">Deyvyd Moura</span>
+      <div class="portal-footer-dot"></div>
+      <span class="portal-footer-name">2026</span>
+    </footer>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            form: {
+              tipo: "",
+              sistema: "",
+              tituloJira: "",
+              tituloLogap: "",
+              linkJira: "",
+              linkGitlab: "",
+              dataRecebimento: "",
+              prioridade: "",
+            },
+            resultado: {
+              gitlab: { titulo: "", labels: [] },
+              clickup: {
+                titulo: "", descricao: "", linkGitlab: "", linkJira: "",
+                datas: { dataRecebimento: "" },
+                responsaveis: [], prioridade: "", analista: "",
+                tarefaImplementar: "", tarefaTestar: "",
+              },
+            },
+            processado: false,
+            grupoExpandido: "",
+          };
+        },
+        methods: {
+          formatarDataInput(data) {
+            if (!data) return "";
+            const [ano, mes, dia] = data.split("-");
+            return `${dia}/${mes}/${ano}`;
+          },
+          extrairNumeroJira(url) {
+            if (!url) return "";
+            const match = url.match(/\/([A-Z]+-\d+)/);
+            return match ? match[1] : "";
+          },
+          extrairNumeroGitlab(url) {
+            if (!url) return "";
+            const match = url.match(/issues\/(\d+)/);
+            return match ? match[1] : "";
+          },
+          preencherDataHoje(campo) {
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+            const dia = String(hoje.getDate()).padStart(2, "0");
+            this.form[campo] = `${ano}-${mes}-${dia}`;
+          },
+          ehDiaUtil(data) {
+            const diaSemana = data.getDay();
+            return diaSemana !== 0 && diaSemana !== 6;
+          },
+          ajustarData(campo, dias) {
+            if (!this.form[campo]) { this.preencherDataHoje(campo); return; }
+            const dataAtual = new Date(this.form[campo] + "T00:00:00");
+            if (dias > 0) {
+              do { dataAtual.setDate(dataAtual.getDate() + 1); } while (!this.ehDiaUtil(dataAtual));
+            } else if (dias < 0) {
+              do { dataAtual.setDate(dataAtual.getDate() - 1); } while (!this.ehDiaUtil(dataAtual));
+            }
+            const ano = dataAtual.getFullYear();
+            const mes = String(dataAtual.getMonth() + 1).padStart(2, "0");
+            const dia = String(dataAtual.getDate()).padStart(2, "0");
+            this.form[campo] = `${ano}-${mes}-${dia}`;
+          },
+          processar() {
+            const numeroJira = this.extrairNumeroJira(this.form.linkJira);
+            const numeroGitlab = this.extrairNumeroGitlab(this.form.linkGitlab);
+            let tituloLogapFinal = "";
+            if (this.form.tipo === "Pipeline") tituloLogapFinal = this.form.tituloLogap || "Criação de pipeline";
+            else if (this.form.tipo === "Vulnerabilidades") tituloLogapFinal = this.form.tituloLogap || "Correção de vulnerabilidades";
+            else tituloLogapFinal = this.form.tituloLogap || "";
+            const sistemaPrefixGitlab = this.form.sistema ? `[${this.form.sistema}]` : "[DevSecOps]";
+            const tituloCompletoGitlab = `${sistemaPrefixGitlab} ${numeroJira} - ${tituloLogapFinal}`;
+            const tituloCompletoClickup = this.form.sistema
+              ? `[${this.form.sistema}] ${numeroJira} - ${tituloLogapFinal}`
+              : `${numeroJira} - ${tituloLogapFinal}`;
+            const prioridadeGitlab = this.form.prioridade === "Média" ? "Normal" : this.form.prioridade;
+            const labels = [`Prioridade → ${prioridadeGitlab}`];
+            if (this.form.tipo) labels.push(`Tipo → ${this.form.tipo}`);
+            this.resultado.gitlab = { titulo: tituloCompletoGitlab, labels };
+            const descricaoGitlab = numeroGitlab
+              ? `<strong>🔶Gitlab:</strong> #${numeroGitlab} ${tituloCompletoGitlab}`
+              : `<strong>🔶Gitlab:</strong> #NNN ${tituloCompletoGitlab}`;
+            const descricaoJira = `<strong>🔷Jira:</strong> #${numeroJira} ${this.form.tituloJira}`;
+            const descricaoCompleta = `${descricaoGitlab}\n${descricaoJira}`;
+            const prioridadeClickup = this.form.prioridade === "Média" ? "Normal" : this.form.prioridade;
+            this.resultado.clickup = {
+              titulo: `Atendimento DevSecOps: ${tituloCompletoClickup}`,
+              descricao: descricaoCompleta,
+              linkGitlab: this.form.linkGitlab || "",
+              linkJira: this.form.linkJira || "",
+              datas: { dataRecebimento: this.formatarDataInput(this.form.dataRecebimento) },
+              responsaveis: ["Júlio Gusmão", "Deyvyd Moura"],
+              prioridade: prioridadeClickup,
+              analista: "Abner Silva",
+              tarefaImplementar: `Implementar: ${tituloCompletoGitlab}`,
+              tarefaTestar: `Testar implementação: ${tituloCompletoGitlab}`,
+            };
+            this.processado = true;
+            setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); }, 100);
+          },
+          copiarItem(texto) { navigator.clipboard.writeText(texto); },
+          toggleGrupo(grupo) { this.grupoExpandido = this.grupoExpandido === grupo ? "" : grupo; },
+          getPrioridadeColor(prioridade) {
+            const cores = { Urgente: "text-red-500", Alta: "text-yellow-500", Normal: "text-blue-500", Baixa: "text-gray-500" };
+            return cores[prioridade] || "text-gray-500";
+          },
+          getLabelLeftClass(label) {
+            const tipo = label.split(" → ")[0];
+            const valor = label.split(" → ")[1];
+            if (tipo === "Prioridade") {
+              const cores = { Urgente: "bg-red-700 text-red-100", Alta: "bg-yellow-600 text-yellow-100", Normal: "bg-blue-700 text-blue-100", Baixa: "bg-gray-600 text-gray-100" };
+              return cores[valor] || "bg-blue-700 text-blue-100";
+            } else if (tipo === "Tipo") return "bg-gray-600 text-gray-200";
+            return "bg-gray-600 text-gray-200";
+          },
+          getLabelBorderColor(label) {
+            const tipo = label.split(" → ")[0];
+            const valor = label.split(" → ")[1];
+            if (tipo === "Prioridade") {
+              const cores = { Urgente: "#b91c1c", Alta: "#ca8a04", Normal: "#1d4ed8", Baixa: "#4b5563" };
+              return cores[valor] || "#1d4ed8";
+            }
+            return "#4b5563";
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
 </html>

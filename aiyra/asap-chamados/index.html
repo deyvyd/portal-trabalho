@@ -1,27 +1,743 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASAP Chamados — Aiyra</title>
-<link rel="stylesheet" href="../../assets/style.css">
-</head>
-<body>
-<div class="blob-1"></div>
-<div class="blob-2"></div>
-<div class="page">
-  <nav>
-    <div class="nav-brand">
-      trabalho<span class="nav-dot"></span><span>deyvyd</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASAP Chamados — Aiyra</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+      :root {
+        --accent:      #38bdf8;
+        --accent-dim:  rgba(56,189,248,.12);
+        --accent-glow: rgba(56,189,248,.08);
+        --bg:          #080b14;
+        --surface:     rgba(255,255,255,.03);
+        --surface-2:   rgba(255,255,255,.05);
+        --border:      rgba(255,255,255,.07);
+        --border-acc:  rgba(56,189,248,.2);
+        --text:        #e2e8f0;
+        --muted:       #94a3b8;
+        --dim:         #475569;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        min-height: 100vh;
+      }
+
+      /* Noise */
+      body::before {
+        content: '';
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      }
+
+      /* Blobs */
+      .blob-1 {
+        position: fixed; top: -120px; right: -120px;
+        width: 500px; height: 500px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(167,139,250,.1) 0%, transparent 70%);
+        pointer-events: none; z-index: 0;
+      }
+      .blob-2 {
+        position: fixed; bottom: -100px; left: -100px;
+        width: 400px; height: 400px; border-radius: 50%;
+        background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+        pointer-events: none; z-index: 0;
+      }
+
+      /* Portal nav */
+      .portal-nav {
+        position: relative; z-index: 10;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 28px;
+        border-bottom: 1px solid rgba(255,255,255,.05);
+      }
+      .portal-brand {
+        font-size: 10px; font-weight: 700; letter-spacing: 2px;
+        text-transform: uppercase; color: #475569;
+      }
+      .portal-brand-accent { color: #a78bfa; }
+      .portal-nav-dot {
+        display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+        background: linear-gradient(135deg, #a78bfa, #22d3ee);
+        margin: 0 5px; vertical-align: middle;
+      }
+      .portal-back {
+        font-size: 11px; color: #334155; text-decoration: none;
+        letter-spacing: .5px; transition: color .2s;
+      }
+      .portal-back:hover { color: var(--accent); }
+
+      /* Portal footer */
+      .portal-footer {
+        position: relative; z-index: 1;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 20px 28px; margin-top: 40px;
+        border-top: 1px solid rgba(255,255,255,.04);
+      }
+      .portal-footer-name { font-size: 11px; color: #1e293b; letter-spacing: 1px; }
+      .portal-footer-dot {
+        width: 4px; height: 4px; border-radius: 50%;
+        background: linear-gradient(135deg, #a78bfa, #22d3ee);
+      }
+
+      /* Tool hero */
+      .tool-hero { padding: 32px 28px 0; }
+      .tool-badge-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--accent-dim);
+        border: 1px solid var(--border-acc);
+        border-radius: 20px; padding: 3px 12px;
+        margin-bottom: 14px;
+        font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+        color: var(--accent); text-transform: uppercase;
+      }
+      .badge-dot {
+        width: 5px; height: 5px; border-radius: 50%;
+        background: var(--accent); animation: badge-pulse 2s infinite;
+        flex-shrink: 0;
+      }
+      @keyframes badge-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+      .tool-hero-title {
+        font-size: 2rem; font-weight: 900; color: var(--text);
+        margin-bottom: 6px; line-height: 1.1;
+      }
+      .tool-hero-title .accent { color: var(--accent); }
+      .tool-hero-subtitle { font-size: 13px; color: var(--dim); margin-bottom: 32px; }
+
+      /* App wrapper */
+      #app { position: relative; z-index: 1; }
+
+      /* ── Tailwind color overrides ── */
+
+      /* Body / page bg */
+      .bg-gray-900 { background-color: var(--bg) !important; }
+
+      /* Primary card surface */
+      .bg-gray-800 {
+        background: rgba(10,15,28,.9) !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: 0 4px 32px rgba(0,0,0,.35) !important;
+      }
+      /* Card hover (accordion headers) */
+      .hover\:bg-gray-750:hover { background: rgba(56,189,248,.04) !important; }
+
+      /* Inner item rows */
+      .bg-gray-700 {
+        background: var(--surface-2) !important;
+        border-radius: 8px !important;
+      }
+      .bg-gray-700.cursor-pointer:hover {
+        background: rgba(56,189,248,.08) !important;
+      }
+      .bg-gray-600 {
+        background: rgba(255,255,255,.07) !important;
+        border-radius: 6px !important;
+      }
+      .bg-gray-600:hover { background: rgba(56,189,248,.1) !important; }
+      .hover\:bg-gray-600:hover { background: rgba(56,189,248,.07) !important; }
+
+      /* Text */
+      .text-gray-100 { color: #e2e8f0 !important; }
+      .text-gray-200 { color: #cbd5e1 !important; }
+      .text-gray-300 { color: #94a3b8 !important; }
+      .text-gray-400 { color: #475569 !important; }
+
+      /* Borders */
+      .border-gray-600 { border-color: rgba(255,255,255,.09) !important; }
+
+      /* Inputs & selects */
+      input[type="text"],
+      input[type="url"],
+      input[type="date"],
+      select {
+        background: rgba(255,255,255,.04) !important;
+        border: 1px solid rgba(255,255,255,.09) !important;
+        color: #e2e8f0 !important;
+        border-radius: 8px !important;
+        transition: border-color .2s, box-shadow .2s !important;
+        font-family: 'Segoe UI', system-ui !important;
+      }
+      input[type="text"]:focus,
+      input[type="url"]:focus,
+      input[type="date"]:focus,
+      select:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(56,189,248,.12) !important;
+        outline: none !important;
+        background: rgba(255,255,255,.06) !important;
+      }
+      input::placeholder { color: #334155 !important; }
+      select option { background: #0d1424; color: #e2e8f0; }
+
+      /* Primary action button */
+      .bg-blue-600 {
+        background: linear-gradient(90deg, var(--accent), #818cf8) !important;
+        color: #080b14 !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 800 !important;
+        letter-spacing: .03em !important;
+        transition: opacity .2s, transform .15s !important;
+      }
+      .bg-blue-600:hover,
+      .hover\:bg-blue-700:hover {
+        opacity: .9 !important;
+        transform: translateY(-1px) !important;
+        background: linear-gradient(90deg, var(--accent), #818cf8) !important;
+      }
+
+      /* Date nav buttons */
+      .bg-blue-900 {
+        background: rgba(56,189,248,.12) !important;
+        border-radius: 4px !important;
+        color: var(--accent) !important;
+      }
+      .hover\:bg-blue-800:hover { background: rgba(56,189,248,.22) !important; }
+
+      /* Hover text */
+      .hover\:text-blue-300:hover { color: var(--accent) !important; }
+      .text-gray-400.hover\:text-blue-300 { color: #475569 !important; }
+
+      /* Accordion section headers */
+      .p-6.cursor-pointer,
+      .p-4.cursor-pointer {
+        transition: background .15s !important;
+      }
+
+      /* Section title icons */
+      .text-orange-500 { color: #fb923c !important; }
+      .text-green-500  { color: #4ade80 !important; }
+      .text-white      { color: #e2e8f0 !important; }
+
+      /* Label pills */
+      .bg-yellow-600   { background: rgba(245,158,11,.18) !important;  color: #fbbf24 !important; border-radius: 6px !important; }
+      .bg-teal-500     { background: rgba(20,184,166,.18) !important;  color: #2dd4bf !important; border-radius: 6px !important; }
+      .bg-pink-500     { background: rgba(236,72,153,.18) !important;  color: #f472b6 !important; border-radius: 6px !important; }
+      .bg-purple-500   { background: rgba(168,85,247,.18) !important;  color: #c084fc !important; border-radius: 6px !important; }
+      .bg-blue-400     { background: rgba(96,165,250,.18) !important;  color: #60a5fa !important; border-radius: 6px !important; }
+      .bg-purple-400   { background: rgba(192,132,252,.18) !important; color: #c084fc !important; border-radius: 6px !important; }
+      .bg-pink-400     { background: rgba(244,114,182,.18) !important; color: #f472b6 !important; border-radius: 6px !important; }
+      .bg-gray-500     { background: rgba(100,116,139,.18) !important; color: #94a3b8 !important; border-radius: 6px !important; }
+      .bg-red-600      { background: rgba(220,38,38,.18) !important;   color: #f87171 !important; border-radius: 6px !important; }
+      .bg-fuchsia-600  { background: rgba(192,38,211,.18) !important;  color: #e879f9 !important; border-radius: 6px !important; }
+
+      /* Priority flag colors */
+      .text-red-500    { color: #f87171 !important; }
+      .text-yellow-500 { color: #fbbf24 !important; }
+      .text-blue-500   { color: var(--accent) !important; }
+      .text-gray-500   { color: #64748b !important; }
+
+      /* Date picker */
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(.5); cursor: pointer;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: rgba(255,255,255,.02); }
+      ::-webkit-scrollbar-thumb { background: rgba(56,189,248,.25); border-radius: 3px; }
+    </style>
+  </head>
+  <body>
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <!-- Portal nav -->
+    <nav class="portal-nav">
+      <a href="/aiyra/" class="portal-back">← Aiyra</a>
+      <div class="portal-brand">
+        trabalho<span class="portal-nav-dot"></span><span class="portal-brand-accent">deyvyd</span>
+      </div>
+    </nav>
+
+    <!-- Tool hero (outside Vue app) -->
+    <div class="tool-hero">
+      <div class="tool-badge-pill"><span class="badge-dot"></span>Aiyra · ASAP</div>
+      <h1 class="tool-hero-title">⚡ <span class="accent">Chamados</span></h1>
+      <p class="tool-hero-subtitle">Gerador de dados para Gitlab · Planilha · ClickUp</p>
     </div>
-  </nav>
-  <a href="/aiyra/" class="back-link">← Voltar</a>
-  <div class="hero-label" style="margin-bottom:16px">
-    <div class="dot"></div>
-    <span>Aiyra</span>
-  </div>
-  <h1 class="placeholder-title"><span class="grad">ASAP Chamados</span></h1>
-  <p class="placeholder-desc">Gestão de chamados. Em breve.</p>
-</div>
-</body>
+
+    <div id="app" class="min-h-screen py-4 px-4 pb-0">
+      <div class="max-w-7xl mx-auto">
+
+        <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Código *</label>
+                <input v-model="form.codigo" type="text" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Empresa *</label>
+                <select v-model="form.empresa" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Selecione...</option>
+                  <option value="CHESF">CHESF</option>
+                  <option value="Eletrobras">Eletrobras</option>
+                  <option value="Eletronorte">Eletronorte</option>
+                  <option value="Eletrosul">Eletrosul</option>
+                  <option value="Furnas">Furnas</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Sistema *</label>
+                <input v-model="form.sistema" type="text" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Título *</label>
+                <input v-model="form.titulo" type="text" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Título Logap</label>
+                <input v-model="form.tituloLogap" type="text" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Link Jira *</label>
+                <input v-model="form.linkJira" type="url" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Link Gitlab</label>
+                <input v-model="form.linkGitlab" type="url" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Analista *</label>
+                <select v-model="form.analista" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Selecione...</option>
+                  <option value="Cleto Xavier">Cleto Xavier</option>
+                  <option value="David Messala">David Messala</option>
+                  <option value="Enaile Vasconcelos">Enaile Vasconcelos</option>
+                  <option value="Josenildo Coutinho">Josenildo Coutinho</option>
+                  <option value="Marcelle Stefany">Marcelle Stefany</option>
+                  <option value="Pedro Jorge">Pedro Jorge</option>
+                  <option value="Rauane Vieira">Rauane Vieira</option>
+                  <option value="Vandeilton Santos">Vandeilton Santos</option>
+                  <option value="Victor Fernando">Victor Fernando</option>
+                  <option value="William Ramon">William Ramon</option>
+                </select>
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-sm font-medium text-gray-300">Data Criação *</label>
+                  <div class="flex items-center gap-2">
+                    <button @click.prevent="ajustarData('dataCriacao', -1)" class="text-xs text-gray-400 hover:text-gray-300 font-bold w-5 h-5 flex items-center justify-center bg-blue-900 rounded hover:bg-blue-800">-</button>
+                    <button @click.prevent="preencherDataHoje('dataCriacao')" class="text-xs text-gray-400 hover:text-blue-300 hover:underline">Hoje</button>
+                  </div>
+                </div>
+                <input v-model="form.dataCriacao" type="date" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-sm font-medium text-gray-300">Data Recebimento</label>
+                  <div class="flex items-center gap-2">
+                    <button @click.prevent="ajustarData('dataRecebimento', -1)" class="text-xs text-gray-400 hover:text-gray-300 font-bold w-5 h-5 flex items-center justify-center bg-blue-900 rounded hover:bg-blue-800">-</button>
+                    <button @click.prevent="preencherDataHoje('dataRecebimento')" class="text-xs text-gray-400 hover:text-blue-300 hover:underline">Hoje</button>
+                  </div>
+                </div>
+                <input v-model="form.dataRecebimento" type="date" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-sm font-medium text-gray-300">Prazo *</label>
+                  <div class="flex items-center gap-2">
+                    <button @click.prevent="ajustarData('prazo', -1)" class="text-xs text-gray-400 hover:text-gray-300 font-bold w-5 h-5 flex items-center justify-center bg-blue-900 rounded hover:bg-blue-800">-</button>
+                    <button @click.prevent="preencherDataHoje('prazo')" class="text-xs text-gray-400 hover:text-blue-300 hover:underline">Hoje</button>
+                    <button @click.prevent="ajustarData('prazo', 1)" class="text-xs text-gray-400 hover:text-gray-300 font-bold w-5 h-5 flex items-center justify-center bg-blue-900 rounded hover:bg-blue-800">+</button>
+                  </div>
+                </div>
+                <input v-model="form.prazo" type="date" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Prioridade *</label>
+                <select v-model="form.prioridade" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Selecione...</option>
+                  <option value="Urgente">Urgente</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Média">Média</option>
+                  <option value="Baixa">Baixa</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Severidade TR *</label>
+                <select v-model="form.severidadeTR" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Selecione...</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Média">Média</option>
+                  <option value="Baixa">Baixa</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Tipo *</label>
+                <select v-model="form.tipo" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Selecione...</option>
+                  <option value="Corretiva">Corretiva</option>
+                  <option value="Evolutiva">Evolutiva</option>
+                  <option value="Técnica">Técnica</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button @click="processar" class="mt-6 w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
+            Processar Dados
+          </button>
+        </div>
+
+        <div v-if="processado" class="space-y-6">
+          <div class="bg-gray-800 rounded-lg shadow-md">
+            <div @click="toggleGrupo('gitlab')" class="p-6 cursor-pointer hover:bg-gray-750 transition-colors flex items-center justify-between">
+              <h2 class="text-xl font-semibold text-gray-100 flex items-center gap-3">
+                <i class="fa-brands fa-gitlab text-orange-500"></i> Gitlab
+              </h2>
+              <i :class="grupoExpandido === 'gitlab' ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas text-gray-400"></i>
+            </div>
+            <div v-show="grupoExpandido === 'gitlab'" class="px-6 pb-6 space-y-3">
+              <div @click="copiarItem(resultado.gitlab.titulo)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Título:</span>
+                <p class="text-gray-300">{{ resultado.gitlab.titulo }}</p>
+              </div>
+              <div class="bg-gray-700 p-3 rounded">
+                <span class="font-semibold text-gray-200 block mb-2">Labels:</span>
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    v-for="(label, index) in resultado.gitlab.labels" :key="index"
+                    @click.stop="copiarItem(label)"
+                    class="inline-flex rounded-full overflow-hidden text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                    :style="{ border: '2px solid ' + getLabelBorderColor(label) }"
+                    style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"
+                  >
+                    <span class="px-1 pb-0.5 font-medium" :class="getLabelLeftClass(label)">{{ label.split(' → ')[0] }}</span>
+                    <span class="px-1 pb-0.5" :style="{ backgroundColor: '#0B0A10', color: '#F0F0F0' }">{{ label.split(' → ')[1] }}</span>
+                  </span>
+                </div>
+              </div>
+              <div @click="copiarItem(resultado.gitlab.date)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Date:</span>
+                <p class="text-gray-300">{{ resultado.gitlab.date }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-800 rounded-lg shadow-md">
+            <div @click="toggleGrupo('planilha')" class="p-6 cursor-pointer hover:bg-gray-750 transition-colors flex items-center justify-between">
+              <h2 class="text-xl font-semibold text-gray-100 flex items-center gap-3">
+                <i class="fa-solid fa-file-excel text-green-500"></i> Planilha
+              </h2>
+              <i :class="grupoExpandido === 'planilha' ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas text-gray-400"></i>
+            </div>
+            <div v-show="grupoExpandido === 'planilha'" class="px-6 pb-6 space-y-2">
+              <div v-for="(value, key) in resultado.planilha" :key="key" @click="copiarItem(value)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200">{{ key }}:</span>
+                <span class="text-gray-300 ml-2">{{ value }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-800 rounded-lg shadow-md">
+            <div @click="toggleGrupo('clickup')" class="p-6 cursor-pointer hover:bg-gray-750 transition-colors flex items-center justify-between">
+              <h2 class="text-xl font-semibold text-gray-100 flex items-center gap-3">
+                <i class="fa-solid fa-list-check text-white"></i> Clickup
+              </h2>
+              <i :class="grupoExpandido === 'clickup' ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas text-gray-400"></i>
+            </div>
+            <div v-show="grupoExpandido === 'clickup'" class="px-6 pb-6 space-y-3">
+              <div @click="copiarItem(resultado.clickup.titulo)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Título:</span>
+                <p class="text-gray-300">{{ resultado.clickup.titulo }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.descricao.replace(/<strong>/g, '').replace(/<\/strong>/g, ''))" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Descrição:</span>
+                <div class="text-gray-300" v-html="resultado.clickup.descricao.replace(/\n/g, '<br>')"></div>
+              </div>
+              <div @click="copiarItem(resultado.clickup.linkGitlab)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Link Gitlab:</span>
+                <p class="text-gray-300">{{ resultado.clickup.linkGitlab }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.linkJira)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Link Jira:</span>
+                <p class="text-gray-300">{{ resultado.clickup.linkJira }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.responsaveis.join('\n'))" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Responsáveis:</span>
+                <div class="text-gray-300">
+                  <div v-for="resp in resultado.clickup.responsaveis" :key="resp">{{ resp }}</div>
+                </div>
+              </div>
+              <div @click="copiarItem(resultado.clickup.datas.dataRecebimento)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Data inicial:</span>
+                <p class="text-gray-300">{{ resultado.clickup.datas.dataRecebimento }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.datas.prazo)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Data de vencimento:</span>
+                <p class="text-gray-300">{{ resultado.clickup.datas.prazo }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.prioridade)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Prioridade:</span>
+                <p class="text-gray-300 flex items-center gap-2">
+                  <i class="fa-solid fa-flag" :class="getPrioridadeColor(resultado.clickup.prioridade)"></i>{{ resultado.clickup.prioridade }}
+                </p>
+              </div>
+              <div v-if="resultado.clickup.etiquetas" @click="copiarItem(resultado.clickup.etiquetas)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Etiquetas:</span>
+                <span class="inline-block px-3 py-1 rounded text-sm font-medium bg-yellow-600 text-white">{{ resultado.clickup.etiquetas }}</span>
+              </div>
+              <div @click="copiarItem(resultado.clickup.analista)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Analista:</span>
+                <p class="text-gray-300">{{ resultado.clickup.analista }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.classificacao)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Classificação:</span>
+                <span class="inline-block px-3 py-1 rounded text-sm font-medium bg-teal-500 text-white">{{ resultado.clickup.classificacao }}</span>
+              </div>
+              <div v-if="resultado.clickup.classificacaoTR" @click="copiarItem(resultado.clickup.classificacaoTR)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Classificação TR:</span>
+                <span class="inline-block px-3 py-1 rounded text-sm font-medium" :class="getClassificacaoTRClass(resultado.clickup.classificacaoTR)">{{ resultado.clickup.classificacaoTR }}</span>
+              </div>
+              <div @click="copiarItem(resultado.clickup.dataAbertura)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Data de Criação:</span>
+                <p class="text-gray-300">{{ resultado.clickup.dataAbertura }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.empresa)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Empresa:</span>
+                <span class="inline-block px-3 py-1 rounded text-sm font-medium" :class="getEmpresaClass(resultado.clickup.empresa)">{{ resultado.clickup.empresa }}</span>
+              </div>
+              <div @click="copiarItem(resultado.clickup.prazoTR)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Prazo TR:</span>
+                <p class="text-gray-300">{{ resultado.clickup.prazoTR }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.tarefaImplementar)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Tarefa - Implementar:</span>
+                <p class="text-gray-300">{{ resultado.clickup.tarefaImplementar }}</p>
+              </div>
+              <div @click="copiarItem(resultado.clickup.tarefaTestar)" class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition-colors">
+                <span class="font-semibold text-gray-200 block mb-1">Tarefa - Testar:</span>
+                <p class="text-gray-300">{{ resultado.clickup.tarefaTestar }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Portal footer -->
+    <footer class="portal-footer">
+      <span class="portal-footer-name">Deyvyd Moura</span>
+      <div class="portal-footer-dot"></div>
+      <span class="portal-footer-name">2026</span>
+    </footer>
+
+    <script>
+      const { createApp } = Vue;
+      createApp({
+        data() {
+          return {
+            form: {
+              codigo: "",
+              empresa: "",
+              sistema: "",
+              titulo: "",
+              tituloLogap: "",
+              linkJira: "",
+              linkGitlab: "",
+              dataCriacao: "",
+              dataRecebimento: "",
+              prazo: "",
+              tipo: "",
+              severidadeTR: "",
+              prioridade: "",
+              analista: "",
+            },
+            processado: false,
+            grupoExpandido: "gitlab",
+            resultado: { gitlab: {}, planilha: {}, clickup: {} },
+          };
+        },
+        methods: {
+          ehDiaUtil(data) {
+            const diaSemana = data.getDay();
+            return diaSemana !== 0 && diaSemana !== 6;
+          },
+          extrairNumeroJira(link) {
+            if (!link) return "";
+            const match = link.match(/VSSES-(\d+)/);
+            return match ? match[1] : "";
+          },
+          extrairNumeroGitlab(link) {
+            if (!link) return "";
+            const match = link.match(/\/(\d{1,3})$/);
+            return match ? match[1] : "";
+          },
+          calcularPrazoTR(severidade) {
+            const hoje = new Date();
+            let diasUteis = 0;
+            switch (severidade) {
+              case "Baixa": diasUteis = 4; break;
+              case "Média": diasUteis = 3; break;
+              case "Alta":  diasUteis = 2; break;
+            }
+            let dataAtual = new Date(hoje);
+            let contagem = 0;
+            while (contagem < diasUteis) {
+              if (this.ehDiaUtil(dataAtual)) contagem++;
+              if (contagem < diasUteis) dataAtual.setDate(dataAtual.getDate() + 1);
+            }
+            return this.formatarData(dataAtual);
+          },
+          formatarData(data) {
+            if (!data) return "";
+            const d = new Date(data);
+            const dia = String(d.getDate()).padStart(2, "0");
+            const mes = String(d.getMonth() + 1).padStart(2, "0");
+            const ano = d.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+          },
+          formatarDataInput(dataStr) {
+            if (!dataStr) return "";
+            const [ano, mes, dia] = dataStr.split("-");
+            return `${dia}/${mes}/${ano}`;
+          },
+          preencherDataHoje(campo) {
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+            const dia = String(hoje.getDate()).padStart(2, "0");
+            this.form[campo] = `${ano}-${mes}-${dia}`;
+          },
+          ajustarData(campo, dias) {
+            let dataAtual;
+            if (this.form[campo]) {
+              dataAtual = new Date(this.form[campo] + "T00:00:00");
+            } else {
+              dataAtual = new Date();
+            }
+            if (dias > 0) {
+              do { dataAtual.setDate(dataAtual.getDate() + 1); } while (!this.ehDiaUtil(dataAtual));
+            } else if (dias < 0) {
+              do { dataAtual.setDate(dataAtual.getDate() - 1); } while (!this.ehDiaUtil(dataAtual));
+            }
+            const ano = dataAtual.getFullYear();
+            const mes = String(dataAtual.getMonth() + 1).padStart(2, "0");
+            const dia = String(dataAtual.getDate()).padStart(2, "0");
+            this.form[campo] = `${ano}-${mes}-${dia}`;
+          },
+          processar() {
+            const tituloFinal = this.form.tituloLogap || this.form.titulo;
+            let classificacaoTR = "";
+            if (this.form.tipo === "Corretiva") classificacaoTR = "Emergencial";
+            else if (this.form.tipo === "Evolutiva") classificacaoTR = "Evolutiva";
+            const prazoTR = this.calcularPrazoTR(this.form.severidadeTR);
+            const numeroJira = this.extrairNumeroJira(this.form.linkJira);
+            const numeroGitlab = this.extrairNumeroGitlab(this.form.linkGitlab);
+            const dataRecebimentoFinal = this.form.dataRecebimento || this.form.dataCriacao;
+            let empresaClickup = this.form.empresa;
+            if (this.form.empresa === "Eletrobras") empresaClickup = "Holding";
+            else if (this.form.empresa === "Furnas") empresaClickup = "Operação Sudeste";
+            let labelTipo = "Evolutiva";
+            if (this.form.tipo === "Corretiva") labelTipo = "Corretiva";
+            else if (this.form.tipo === "Técnica") labelTipo = "Técnica";
+            const prioridadeGitlab = this.form.prioridade === "Média" ? "Normal" : this.form.prioridade;
+            this.resultado.gitlab = {
+              titulo: `${this.form.codigo} - [${this.form.sistema}] ${tituloFinal}`,
+              labels: [`Prioridade → ${prioridadeGitlab}`, `Tipo → ${labelTipo}`],
+              date: this.formatarDataInput(this.form.prazo),
+            };
+            this.resultado.planilha = {
+              Código: this.form.codigo,
+              "Link Gitlab": this.form.linkGitlab || "",
+              Empresa: this.form.empresa,
+              Sistema: this.form.sistema,
+              Título: tituloFinal,
+              "Classificação TR": classificacaoTR,
+              Tipo: this.form.tipo,
+              "Severidade TR": this.form.severidadeTR,
+              Prioridade: this.form.prioridade,
+              Analista: this.form.analista,
+              "Data de abertura": this.formatarDataInput(this.form.dataCriacao),
+              "Data de recebimento": this.formatarDataInput(dataRecebimentoFinal),
+              "Prazo TR": prazoTR,
+              Prazo: this.formatarDataInput(this.form.prazo),
+            };
+            const descricaoGitlab = numeroGitlab
+              ? `<strong>🔶Gitlab:</strong> #${numeroGitlab} ${tituloFinal}`
+              : `<strong>🔶Gitlab:</strong> #NNN ${tituloFinal}`;
+            const descricaoJira = `<strong>🔷Jira:</strong> #VSSES-${numeroJira} ${this.form.titulo}`;
+            const descricaoCompleta = `${descricaoGitlab}\n${descricaoJira}`;
+            const prioridadeClickup = this.form.prioridade === "Média" ? "Normal" : this.form.prioridade;
+            const etiquetas = this.form.tipo === "Evolutiva" || this.form.tipo === "Técnica" ? "melhoria" : null;
+            this.resultado.clickup = {
+              titulo: `Atendimento do chamado: [${this.form.sistema}] ${this.form.codigo} - ${tituloFinal}`,
+              descricao: descricaoCompleta,
+              linkGitlab: this.form.linkGitlab || "",
+              linkJira: this.form.linkJira || "",
+              datas: {
+                dataRecebimento: this.formatarDataInput(dataRecebimentoFinal),
+                prazo: this.formatarDataInput(this.form.prazo),
+              },
+              responsaveis: ["Júlio Gusmão", "Deyvyd Moura"],
+              prioridade: prioridadeClickup,
+              etiquetas: etiquetas,
+              analista: this.form.analista,
+              classificacao: "Execução Chamado",
+              classificacaoTR: classificacaoTR,
+              dataAbertura: this.formatarDataInput(this.form.dataCriacao),
+              empresa: empresaClickup,
+              prazoTR: prazoTR,
+              tarefaImplementar: `Implementar tarefa ${this.form.codigo}: ${tituloFinal}`,
+              tarefaTestar: `Testar implementação da tarefa ${this.form.codigo}: ${tituloFinal}`,
+            };
+            this.processado = true;
+            setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); }, 100);
+          },
+          copiarItem(texto) { navigator.clipboard.writeText(texto); },
+          toggleGrupo(grupo) { this.grupoExpandido = this.grupoExpandido === grupo ? "" : grupo; },
+          getPrioridadeColor(prioridade) {
+            const cores = { Urgente: "text-red-500", Alta: "text-yellow-500", Normal: "text-blue-500", Baixa: "text-gray-500" };
+            return cores[prioridade] || "text-gray-500";
+          },
+          getLabelLeftClass(label) {
+            const tipo = label.split(" → ")[0];
+            const valor = label.split(" → ")[1];
+            if (tipo === "Prioridade") {
+              const cores = { Urgente: "bg-red-700 text-red-100", Alta: "bg-yellow-600 text-yellow-100", Normal: "bg-blue-700 text-blue-100", Baixa: "bg-gray-600 text-gray-100" };
+              return cores[valor] || "bg-blue-700 text-blue-100";
+            } else if (tipo === "Tipo") return "bg-gray-600 text-gray-200";
+            return "bg-gray-600 text-gray-200";
+          },
+          getLabelBorderColor(label) {
+            const tipo = label.split(" → ")[0];
+            const valor = label.split(" → ")[1];
+            if (tipo === "Prioridade") {
+              const cores = { Urgente: "#b91c1c", Alta: "#ca8a04", Normal: "#1d4ed8", Baixa: "#4b5563" };
+              return cores[valor] || "#1d4ed8";
+            }
+            return "#4b5563";
+          },
+          getEmpresaClass(empresa) {
+            const classes = { CHESF: "bg-pink-500 text-white", Eletronorte: "bg-purple-500 text-white", Eletrosul: "bg-blue-400 text-white", Holding: "bg-purple-400 text-white", "Operação Sudeste": "bg-pink-400 text-white" };
+            return classes[empresa] || "bg-gray-500 text-white";
+          },
+          getClassificacaoTRClass(classificacao) {
+            const classes = { Emergencial: "bg-red-600 text-white", Evolutiva: "bg-fuchsia-600 text-white" };
+            return classes[classificacao] || "bg-gray-500 text-white";
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
 </html>
