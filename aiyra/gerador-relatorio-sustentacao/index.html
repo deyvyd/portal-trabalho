@@ -1,578 +1,867 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📄 Gerador de Relatório — Sustentação · Aiyra</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerador de Relatório — Sustentação · Aiyra</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
 
-  <style>
-    :root {
-      --bg:       #080b14;
-      --surface:  #0d1426;
-      --surface2: #111c35;
-      --border:   rgba(245,158,11,0.18);
-      --amber:    #f59e0b;
-      --amber-dim:#92600a;
-      --cyan:     #67e8f9;
-      --green:    #4ade80;
-      --red:      #f87171;
-      --text:     #e2e8f0;
-      --muted:    #8899b4;
-    }
+    <style>
+      :root {
+        --bg: #080b14;
+        --surface: #0d1426;
+        --surface2: #111c35;
+        --border: rgba(245, 158, 11, 0.18);
+        --amber: #f59e0b;
+        --amber-dim: #92600a;
+        --cyan: #67e8f9;
+        --green: #4ade80;
+        --red: #f87171;
+        --text: #e2e8f0;
+        --muted: #8899b4;
+      }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'IBM Plex Sans', sans-serif;
-      min-height: 100vh;
-    }
-    .mono { font-family: 'IBM Plex Mono', monospace; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "IBM Plex Sans", sans-serif;
+        min-height: 100vh;
+      }
+      .mono {
+        font-family: "IBM Plex Mono", monospace;
+      }
 
-    /* Noise overlay */
-    body::before {
-      content:'';
-      position:fixed; inset:0; z-index:0; pointer-events:none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-      opacity:.4;
-    }
+      /* Noise overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+        opacity: 0.4;
+      }
 
-    /* Grid lines — amber, distinctive identity */
-    body::after {
-      content:'';
-      position:fixed; inset:0; z-index:0; pointer-events:none;
-      background-image:
-        linear-gradient(rgba(245,158,11,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245,158,11,.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-    }
+      /* Grid lines — amber, distinctive identity */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(245, 158, 11, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
 
-    /* Portal blobs — subtle, alongside amber identity */
-    .blob-portal-1 {
-      position:fixed; top:-80px; right:-80px;
-      width:380px; height:380px; border-radius:50%;
-      background:radial-gradient(circle, rgba(167,139,250,.09) 0%, transparent 70%);
-      pointer-events:none; z-index:0;
-    }
-    .blob-portal-2 {
-      position:fixed; bottom:-80px; left:-60px;
-      width:300px; height:300px; border-radius:50%;
-      background:radial-gradient(circle, rgba(245,158,11,.07) 0%, transparent 70%);
-      pointer-events:none; z-index:0;
-    }
+      /* Portal blobs — subtle, alongside amber identity */
+      .blob-portal-1 {
+        position: fixed;
+        top: -80px;
+        right: -80px;
+        width: 380px;
+        height: 380px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(167, 139, 250, 0.09) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .blob-portal-2 {
+        position: fixed;
+        bottom: -80px;
+        left: -60px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(245, 158, 11, 0.07) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
 
-    /* Portal nav */
-    .portal-nav {
-      position:relative; z-index:10;
-      border-bottom:1px solid rgba(255,255,255,.04);
-    }
-    .portal-nav-inner {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:18px 16px;
-      max-width:42rem; margin:0 auto;
-    }
-    .portal-brand {
-      font-size:10px; font-weight:700; letter-spacing:2px;
-      text-transform:uppercase; color:#64748b;
-      font-family:'Segoe UI', system-ui, sans-serif;
-    }
-    .portal-brand-accent { color:#a78bfa; }
-    .portal-nav-dot {
-      display:inline-block; width:5px; height:5px; border-radius:50%;
-      background:linear-gradient(135deg,#a78bfa,#22d3ee);
-      margin:0 5px; vertical-align:middle;
-    }
-    .portal-back {
-      font-size:11px; color:#64748b; text-decoration:none;
-      font-family:'Segoe UI', system-ui, sans-serif;
-      letter-spacing:.5px; transition:color .2s;
-    }
-    .portal-back:hover { color:#f59e0b; }
+      /* Portal nav */
+      .portal-nav {
+        position: relative;
+        z-index: 10;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .portal-nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 16px;
+        max-width: 42rem;
+        margin: 0 auto;
+      }
+      .portal-brand {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #64748b;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+      .portal-brand-accent {
+        color: #a78bfa;
+      }
+      .portal-nav-dot {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #a78bfa, #22d3ee);
+        margin: 0 5px;
+        vertical-align: middle;
+      }
+      .portal-back {
+        font-size: 11px;
+        color: #64748b;
+        text-decoration: none;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        letter-spacing: 0.5px;
+        transition: color 0.2s;
+      }
+      .portal-back:hover {
+        color: #f59e0b;
+      }
 
-    /* Portal footer */
-    .portal-footer {
-      position:relative; z-index:1;
-      border-top:1px solid rgba(255,255,255,.04);
-      margin-top:32px;
-    }
-    .portal-footer-inner {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:20px 16px;
-      max-width:42rem; margin:0 auto;
-    }
-    .portal-footer-name { font-size:11px; color:#64748b; letter-spacing:1px; font-family:'Segoe UI',system-ui; }
-    .portal-footer-dot {
-      width:4px; height:4px; border-radius:50%;
-      background:linear-gradient(135deg,#a78bfa,#22d3ee);
-    }
+      /* Portal footer */
+      .portal-footer {
+        position: relative;
+        z-index: 1;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        margin-top: 32px;
+      }
+      .portal-footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 16px;
+        max-width: 42rem;
+        margin: 0 auto;
+      }
+      .portal-footer-name {
+        font-size: 11px;
+        color: #64748b;
+        letter-spacing: 1px;
+        font-family: "Segoe UI", system-ui;
+      }
+      .portal-footer-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #a78bfa, #22d3ee);
+      }
 
-    .wrapper { position:relative; z-index:1; }
+      .wrapper {
+        position: relative;
+        z-index: 1;
+      }
 
-    /* Card */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 0 40px rgba(245,158,11,.05), 0 8px 32px rgba(0,0,0,.4);
-    }
+      /* Card */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow:
+          0 0 40px rgba(245, 158, 11, 0.05),
+          0 8px 32px rgba(0, 0, 0, 0.4);
+      }
 
-    /* Drop zone */
-    .dropzone {
-      border: 2px dashed rgba(245,158,11,.3);
-      border-radius: 10px;
-      transition: all .2s;
-      background: rgba(245,158,11,.02);
-      cursor: pointer;
-    }
-    .dropzone:hover, .dropzone.active {
-      border-color: var(--amber);
-      background: rgba(245,158,11,.06);
-      box-shadow: 0 0 20px rgba(245,158,11,.1);
-    }
+      /* Drop zone */
+      .dropzone {
+        border: 2px dashed rgba(245, 158, 11, 0.3);
+        border-radius: 10px;
+        transition: all 0.2s;
+        background: rgba(245, 158, 11, 0.02);
+        cursor: pointer;
+      }
+      .dropzone:hover,
+      .dropzone.active {
+        border-color: var(--amber);
+        background: rgba(245, 158, 11, 0.06);
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+      }
 
-    /* Amber button */
-    .btn-amber {
-      background: var(--amber);
-      color: #000;
-      font-family: 'IBM Plex Mono', monospace;
-      font-weight: 600;
-      font-size: .85rem;
-      padding: .7rem 1.8rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all .2s;
-      letter-spacing: .04em;
-    }
-    .btn-amber:hover { background: #fbbf24; box-shadow: 0 0 20px rgba(245,158,11,.4); }
-    .btn-amber:disabled { background: var(--amber-dim); color: #555; cursor: not-allowed; box-shadow: none; }
+      /* Amber button */
+      .btn-amber {
+        background: var(--amber);
+        color: #000;
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.7rem 1.8rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 0.04em;
+      }
+      .btn-amber:hover {
+        background: #fbbf24;
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+      }
+      .btn-amber:disabled {
+        background: var(--amber-dim);
+        color: #555;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
 
-    /* Ghost button */
-    .btn-ghost {
-      background: transparent;
-      color: var(--amber);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .8rem;
-      font-weight: 500;
-      padding: .5rem 1.2rem;
-      border: 1px solid rgba(245,158,11,.4);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all .2s;
-      letter-spacing: .04em;
-    }
-    .btn-ghost:hover { border-color: var(--amber); background: rgba(245,158,11,.07); }
+      /* Ghost button */
+      .btn-ghost {
+        background: transparent;
+        color: var(--amber);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.5rem 1.2rem;
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 0.04em;
+      }
+      .btn-ghost:hover {
+        border-color: var(--amber);
+        background: rgba(245, 158, 11, 0.07);
+      }
 
-    /* Input */
-    .input-field {
-      background: var(--surface2);
-      border: 1px solid rgba(245,158,11,.2);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .95rem;
-      padding: .7rem 1rem;
-      width: 100%;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .input-field:focus {
-      border-color: var(--amber);
-      box-shadow: 0 0 0 3px rgba(245,158,11,.12);
-    }
-    .input-field::placeholder { color: var(--muted); }
+      /* Input */
+      .input-field {
+        background: var(--surface2);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.95rem;
+        padding: 0.7rem 1rem;
+        width: 100%;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .input-field:focus {
+        border-color: var(--amber);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+      }
+      .input-field::placeholder {
+        color: var(--muted);
+      }
 
-    /* File pill */
-    .file-pill {
-      display: flex; align-items: center; gap: .5rem;
-      background: var(--surface2);
-      border: 1px solid rgba(103,232,249,.15);
-      border-radius: 6px;
-      padding: .45rem .8rem;
-      font-size: .8rem;
-    }
+      /* File pill */
+      .file-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--surface2);
+        border: 1px solid rgba(103, 232, 249, 0.15);
+        border-radius: 6px;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.8rem;
+      }
 
-    /* Step badge */
-    .step-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 28px; height: 28px;
-      background: rgba(245,158,11,.12);
-      border: 1px solid rgba(245,158,11,.35);
-      border-radius: 50%;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .75rem;
-      font-weight: 600;
-      color: var(--amber);
-      flex-shrink: 0;
-    }
+      /* Step badge */
+      .step-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.35);
+        border-radius: 50%;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--amber);
+        flex-shrink: 0;
+      }
 
-    /* Result email box */
-    .email-box {
-      background: var(--surface2);
-      border: 1px solid rgba(74,222,128,.2);
-      border-radius: 8px;
-      padding: 1.2rem 1.4rem;
-      font-size: .9rem;
-      line-height: 1.85;
-      color: #c8dcc8;
-      font-family: 'IBM Plex Sans', sans-serif;
-    }
-    .email-box p { margin-bottom: .6rem; }
-    .email-box p:last-child { margin-bottom: 0; }
-    .email-box b {
-      color: #f0fdf0;
-      font-weight: 600;
-      background: rgba(74,222,128,.08);
-      border-radius: 3px;
-      padding: 0 3px;
-    }
+      /* Result email box */
+      .email-box {
+        background: var(--surface2);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 8px;
+        padding: 1.2rem 1.4rem;
+        font-size: 0.9rem;
+        line-height: 1.85;
+        color: #c8dcc8;
+        font-family: "IBM Plex Sans", sans-serif;
+      }
+      .email-box p {
+        margin-bottom: 0.6rem;
+      }
+      .email-box p:last-child {
+        margin-bottom: 0;
+      }
+      .email-box b {
+        color: #f0fdf0;
+        font-weight: 600;
+        background: rgba(74, 222, 128, 0.08);
+        border-radius: 3px;
+        padding: 0 3px;
+      }
 
-    /* Spinner */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(245,158,11,.3);
-      border-top-color: var(--amber);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
-
-    /* Pulse dot */
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-    .pulse { animation: pulse 1.4s ease-in-out infinite; }
-
-    /* Fade in */
-    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    .fade-up { animation: fadeUp .35s ease forwards; }
-
-    /* Tag badge */
-    .tag {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .7rem;
-      padding: .2rem .55rem;
-      border-radius: 4px;
-      font-weight: 500;
-    }
-    .tag-green  { background: rgba(74,222,128,.1);  color: var(--green);  border: 1px solid rgba(74,222,128,.25); }
-    .tag-cyan   { background: rgba(103,232,249,.1); color: var(--cyan);   border: 1px solid rgba(103,232,249,.25); }
-    .tag-amber  { background: rgba(245,158,11,.1);  color: var(--amber);  border: 1px solid rgba(245,158,11,.25); }
-    .tag-red    { background: rgba(248,113,113,.1); color: var(--red);    border: 1px solid rgba(248,113,113,.25); }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--surface); }
-    ::-webkit-scrollbar-thumb { background: rgba(245,158,11,.3); border-radius: 3px; }
-
-    label { cursor: pointer; }
-
-    .divider {
-      border: none;
-      border-top: 1px solid rgba(245,158,11,.1);
-      margin: 1.5rem 0;
-    }
-  </style>
-</head>
-<body>
-
-<!-- Portal blobs -->
-<div class="blob-portal-1"></div>
-<div class="blob-portal-2"></div>
-
-<!-- Portal nav -->
-<nav class="portal-nav">
-  <div class="portal-nav-inner">
-    <a href="/aiyra/" class="portal-back">← Aiyra</a>
-    <div class="portal-brand">
-      trabalho<span class="portal-nav-dot"></span><span class="portal-brand-accent">deyvyd moura</span>
-    </div>
-  </div>
-</nav>
-
-<div id="app" class="wrapper"></div>
-
-<!-- Portal footer -->
-<footer class="portal-footer">
-  <div class="portal-footer-inner">
-    <span class="portal-footer-name">Deyvyd Moura</span>
-    <div class="portal-footer-dot"></div>
-    <span class="portal-footer-name">2026</span>
-  </div>
-</footer>
-
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-const MONTHS_PT = [
-  'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
-  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
-];
-
-const COMPANY_MAP = {
-  'ELETROBRAS':  'Axia_Energia',
-  'ELETRONORTE': 'Axia_Energia_Norte',
-  'ELETROSUL':   'Axia_Energia_Sul',
-  'CHESF':       'Axia_Energia_Nordeste',
-  'FURNAS':      'Axia_Energia_Operacao_Sudeste',
-};
-
-function mapCompanyName(raw) {
-  if (!raw) return 'Empresa';
-  const upper = raw.toUpperCase().trim();
-  for (const [key, val] of Object.entries(COMPANY_MAP)) {
-    if (upper.includes(key)) return val;
-  }
-  return raw.trim().replace(/\s+/g, '_').replace(/[^\w_]/g, '');
-}
-
-async function extractAllPages(file) {
-  const buf = await file.arrayBuffer();
-  const pdfjsDoc = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
-  const pages = [];
-  for (let i = 1; i <= pdfjsDoc.numPages; i++) {
-    const page  = await pdfjsDoc.getPage(i);
-    const tc    = await page.getTextContent();
-    let   text  = '';
-    let   lastY = null;
-    for (const item of tc.items) {
-      if (item.str === undefined) continue;
-      const y = item.transform ? item.transform[5] : null;
-      if (lastY !== null && y !== null && Math.abs(y - lastY) > 4) text += '\n';
-      text += item.str + ' ';
-      if (y !== null) lastY = y;
-    }
-    pages.push({ text: text.trim(), index: i - 1 });
-  }
-  return { arrayBuffer: buf, pages };
-}
-
-function parsePage(text) {
-  const flat = text.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ');
-
-  let context = null;
-  const flatLower = flat.toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '');
-
-  if (/por contexto[:\s]+nao finalizado/i.test(flatLower)) context = 'nao_finalizado';
-  else if (/nao finalizado/i.test(flatLower) && /por contexto/i.test(flatLower)) context = 'nao_finalizado';
-  else if (/por contexto[:\s]+fechado/i.test(flatLower)) context = 'fechado';
-  else if (/por contexto/i.test(flatLower) && /fechado/i.test(flatLower)) context = 'fechado';
-  else if (/n.o finalizado/i.test(flat) && !(/fechado/i.test(flat))) context = 'nao_finalizado';
-  else if (/fechado/i.test(flat) && !(/finalizado/i.test(flat))) context = 'fechado';
-
-  let company = null;
-  const knownNames = ['ELETRONORTE','ELETROSUL','ELETROBRAS','CHESF','FURNAS'];
-  for (const name of knownNames) {
-    if (flat.toUpperCase().includes(name)) { company = name; break; }
-  }
-  if (!company) {
-    const m = flat.match(/[Ee]mpresa[:\s]+([A-ZÁÉÍÓÚÃÕÂÊÎÔÛÇ][A-ZÁÉÍÓÚÃÕÂÊÎÔÛÇ\s]{1,30}?)(?:\s{3,}|\d|$)/);
-    if (m) company = m[1].trim();
-  }
-
-  let month = null, year = null;
-  const dateMatch = flat.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-  if (dateMatch) { month = parseInt(dateMatch[2], 10); year = parseInt(dateMatch[3], 10); }
-
-  const dataCount = (text.match(/SCTASK\d+|INC\d+/g) || []).length;
-  const stripped = text.replace(/\s+/g, '').length;
-  const isEmpty  = stripped < 30;
-
-  return { context, company, month, year, dataCount, isEmpty, flat };
-}
-
-const { createApp, ref, computed } = Vue;
-
-createApp({
-  setup() {
-    const files        = ref([]);
-    const ssNumber     = ref('');
-    const processing   = ref(false);
-    const result       = ref(null);
-    const emailText    = ref('');
-    const emailHtmlVal = ref('');
-    const noDemands    = ref(false);
-    const parsedInfo   = ref(null);
-    const error        = ref('');
-    const emailCopied  = ref(false);
-    const isDragOver   = ref(false);
-    const log          = ref([]);
-
-    function addFiles(list) {
-      for (const f of list) {
-        if (f.type === 'application/pdf' && !files.value.find(x => x.name === f.name)) {
-          files.value.push(f);
+      /* Spinner */
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
       }
-    }
-    function removeFile(i) { files.value.splice(i, 1); }
-    function onDrop(e) {
-      e.preventDefault(); isDragOver.value = false;
-      addFiles(e.dataTransfer.files);
-    }
-    function onFileInput(e) { addFiles(e.target.files); e.target.value = ''; }
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(245, 158, 11, 0.3);
+        border-top-color: var(--amber);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
 
-    async function processFiles() {
-      error.value   = '';
-      result.value  = null;
-      emailText.value = '';
-      emailHtmlVal.value = '';
-      noDemands.value = false;
-      parsedInfo.value = null;
-      log.value     = [];
+      /* Pulse dot */
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .pulse {
+        animation: pulse 1.4s ease-in-out infinite;
+      }
 
-      if (!files.value.length) { error.value = 'Adicione ao menos um arquivo PDF.'; return; }
-      if (!ssNumber.value.trim()) { error.value = 'Informe o número da SS.'; return; }
+      /* Fade in */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-up {
+        animation: fadeUp 0.35s ease forwards;
+      }
 
-      processing.value = true;
-      try {
-        addLog('Lendo arquivos PDF…');
-        const allCandidates = [];
+      /* Tag badge */
+      .tag {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+      .tag-green {
+        background: rgba(74, 222, 128, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(74, 222, 128, 0.25);
+      }
+      .tag-cyan {
+        background: rgba(103, 232, 249, 0.1);
+        color: var(--cyan);
+        border: 1px solid rgba(103, 232, 249, 0.25);
+      }
+      .tag-amber {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--amber);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+      }
+      .tag-red {
+        background: rgba(248, 113, 113, 0.1);
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.25);
+      }
 
-        const pdfDataArr = [];
-        for (let fi = 0; fi < files.value.length; fi++) {
-          addLog(`Processando: ${files.value[fi].name}`);
-          const { arrayBuffer, pages } = await extractAllPages(files.value[fi]);
-          pdfDataArr.push({ arrayBuffer, name: files.value[fi].name });
-          for (const pg of pages) {
-            const meta = parsePage(pg.text);
-            if (!meta.isEmpty) {
-              allCandidates.push({ fileIdx: fi, pageIdx: pg.index, ...meta, arrayBuffer });
-              addLog(`  ↳ Pág. ${pg.index + 1}: contexto=${meta.context||'?'} | chamados=${meta.dataCount} | empresa=${meta.company||'?'}`);
-            } else {
-              addLog(`  ↳ Pág. ${pg.index + 1} ignorada (sem dados, ${pg.text.replace(/\s+/g,'').length} chars)`);
-            }
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--surface);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(245, 158, 11, 0.3);
+        border-radius: 3px;
+      }
+
+      label {
+        cursor: pointer;
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid rgba(245, 158, 11, 0.1);
+        margin: 1.5rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Portal blobs -->
+    <div class="blob-portal-1"></div>
+    <div class="blob-portal-2"></div>
+
+    <!-- Portal nav -->
+    <nav class="portal-nav">
+      <div class="portal-nav-inner">
+        <a href="/aiyra/" class="portal-back">← Aiyra</a>
+        <div class="portal-brand">
+          trabalho<span class="portal-nav-dot"></span
+          ><span class="portal-brand-accent">deyvyd moura</span>
+        </div>
+      </div>
+    </nav>
+
+    <div id="app" class="wrapper"></div>
+
+    <!-- Portal footer -->
+    <footer class="portal-footer">
+      <div class="portal-footer-inner">
+        <span class="portal-footer-name">Deyvyd Moura</span>
+        <div class="portal-footer-dot"></div>
+        <span class="portal-footer-name">2026</span>
+      </div>
+    </footer>
+
+    <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      const MONTHS_PT = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+      ];
+
+      const COMPANY_MAP = {
+        ELETROBRAS: "Axia_Energia",
+        ELETRONORTE: "Axia_Energia_Norte",
+        ELETROSUL: "Axia_Energia_Sul",
+        CHESF: "Axia_Energia_Nordeste",
+        FURNAS: "Axia_Energia_Operacao_Sudeste",
+      };
+
+      function mapCompanyName(raw) {
+        if (!raw) return "Empresa";
+        const upper = raw.toUpperCase().trim();
+        for (const [key, val] of Object.entries(COMPANY_MAP)) {
+          if (upper.includes(key)) return val;
+        }
+        return raw
+          .trim()
+          .replace(/\s+/g, "_")
+          .replace(/[^\w_]/g, "");
+      }
+
+      async function extractAllPages(file) {
+        const buf = await file.arrayBuffer();
+        const pdfjsDoc = await pdfjsLib.getDocument({ data: buf.slice(0) })
+          .promise;
+        const pages = [];
+        for (let i = 1; i <= pdfjsDoc.numPages; i++) {
+          const page = await pdfjsDoc.getPage(i);
+          const tc = await page.getTextContent();
+          let text = "";
+          let lastY = null;
+          for (const item of tc.items) {
+            if (item.str === undefined) continue;
+            const y = item.transform ? item.transform[5] : null;
+            if (lastY !== null && y !== null && Math.abs(y - lastY) > 4)
+              text += "\n";
+            text += item.str + " ";
+            if (y !== null) lastY = y;
+          }
+          pages.push({ text: text.trim(), index: i - 1 });
+        }
+        return { arrayBuffer: buf, pages };
+      }
+
+      function parsePage(text) {
+        const flat = text.replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ");
+
+        let context = null;
+        const flatLower = flat
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[̀-ͯ]/g, "");
+
+        if (/por contexto[:\s]+nao finalizado/i.test(flatLower))
+          context = "nao_finalizado";
+        else if (
+          /nao finalizado/i.test(flatLower) &&
+          /por contexto/i.test(flatLower)
+        )
+          context = "nao_finalizado";
+        else if (/por contexto[:\s]+fechado/i.test(flatLower))
+          context = "fechado";
+        else if (/por contexto/i.test(flatLower) && /fechado/i.test(flatLower))
+          context = "fechado";
+        else if (/n.o finalizado/i.test(flat) && !/fechado/i.test(flat))
+          context = "nao_finalizado";
+        else if (/fechado/i.test(flat) && !/finalizado/i.test(flat))
+          context = "fechado";
+
+        let company = null;
+        const knownNames = [
+          "ELETRONORTE",
+          "ELETROSUL",
+          "ELETROBRAS",
+          "CHESF",
+          "FURNAS",
+        ];
+        for (const name of knownNames) {
+          if (flat.toUpperCase().includes(name)) {
+            company = name;
+            break;
           }
         }
-
-        if (!allCandidates.length) throw new Error('Nenhuma página com dados encontrada nos PDFs.');
-
-        const noCtx = allCandidates.filter(c => !c.context);
-        if (noCtx.length && allCandidates.every(c => !c.context)) {
-          const debugText = noCtx.map((c,i) => `[Pág ${c.pageIdx+1}]:\n${c.flat?.slice(0,300)}`).join('\n\n');
-          throw new Error(`Contexto não identificado. Texto extraído (primeiros 300 chars por pág):\n\n${debugText}`);
+        if (!company) {
+          const m = flat.match(
+            /[Ee]mpresa[:\s]+([A-ZÁÉÍÓÚÃÕÂÊÎÔÛÇ][A-ZÁÉÍÓÚÃÕÂÊÎÔÛÇ\s]{1,30}?)(?:\s{3,}|\d|$)/,
+          );
+          if (m) company = m[1].trim();
         }
 
-        const company = allCandidates.find(c => c.company)?.company || 'EMPRESA';
-        const month   = allCandidates.find(c => c.month)?.month || 1;
-        const year    = allCandidates.find(c => c.year)?.year  || new Date().getFullYear();
-        const monthName = MONTHS_PT[month - 1];
-        const ssNum     = String(ssNumber.value).padStart(3, '0');
-        const ssCode    = `SS-CTNI-0534-2021.00-${ssNum}-${year}`;
-        const companyDisplay = mapCompanyName(company).replace(/_/g, ' ');
-        addLog(`Empresa: ${company} | Mês: ${monthName} | Ano: ${year}`);
-
-        const totalDemands = allCandidates.reduce((s, c) => s + c.dataCount, 0);
-        if (totalDemands === 0) {
-          addLog('Nenhuma demanda encontrada — gerando apenas e-mail de ausência.');
-          const monthLow = monthName.toLowerCase();
-          emailText.value = `Prezados,\n\nNeste mês de ${monthLow} de ${year}, não houve atuação em demandas da ${companyDisplay} referentes à ${ssCode}, pois todas as demandas anteriores foram finalizadas e não foram abertos novos incidentes.\n\nCaso tenha qualquer dúvida ou necessite de informações adicionais, estamos à disposição.`;
-          emailHtmlVal.value = `<p>Prezados,</p><p>Neste mês de <b>${monthLow} de ${year}</b>, não houve atuação em demandas da <b>${companyDisplay}</b> referentes à <b>${ssCode}</b>, pois todas as demandas anteriores foram finalizadas e não foram abertos novos incidentes.</p><p>Caso tenha qualquer dúvida ou necessite de informações adicionais, estamos à disposição.</p>`;
-          parsedInfo.value = { company, month, year, monthName, ssCode, companyDisplay, pages: [] };
-          noDemands.value  = true;
-          addLog('✓ Concluído!');
-          return;
+        let month = null,
+          year = null;
+        const dateMatch = flat.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (dateMatch) {
+          month = parseInt(dateMatch[2], 10);
+          year = parseInt(dateMatch[3], 10);
         }
 
-        function bestOfContext(ctx) {
-          const candidates = allCandidates.filter(c => c.context === ctx);
-          if (!candidates.length) return null;
-          return candidates.reduce((a, b) => a.dataCount >= b.dataCount ? a : b);
-        }
+        const dataCount = (text.match(/SCTASK\d+|INC\d+/g) || []).length;
+        const stripped = text.replace(/\s+/g, "").length;
+        const isEmpty = stripped < 30;
 
-        const naoFinalizado = bestOfContext('nao_finalizado');
-        const fechado       = bestOfContext('fechado');
-
-        const selectedPages = [naoFinalizado, fechado].filter(Boolean);
-        if (!selectedPages.length) throw new Error('Não foram encontradas páginas com contexto identificável.');
-
-        addLog(`Páginas selecionadas: ${selectedPages.map(p => p.context === 'nao_finalizado' ? 'Não Finalizados' : 'Fechados').join(' + ')}`);
-
-        addLog('Montando PDF de saída…');
-        const { PDFDocument } = PDFLib;
-        const outDoc = await PDFDocument.create();
-
-        for (const pg of selectedPages) {
-          const srcDoc  = await PDFDocument.load(pg.arrayBuffer);
-          const [copied] = await outDoc.copyPages(srcDoc, [pg.pageIdx]);
-          outDoc.addPage(copied);
-          addLog(`  ↳ Adicionada: ${pg.context === 'nao_finalizado' ? 'Não Finalizados' : 'Fechados'} (arquivo ${pg.fileIdx + 1}, pág. ${pg.pageIdx + 1})`);
-        }
-
-        const pdfBytes = await outDoc.save();
-
-        const cleanCo   = mapCompanyName(company);
-        const filename  = `Relatorio-${cleanCo}-${monthName}_${year}.pdf`;
-
-        const monthLow  = monthName.toLowerCase();
-        emailText.value = `Prezados,\n\nSegue em anexo o relatório de acompanhamento detalhando os chamados referentes à ${ssCode} entregues no mês de ${monthLow} de ${year}.\n\nCaso tenha qualquer dúvida ou necessite de informações adicionais, estamos à disposição.`;
-        emailHtmlVal.value = `<p>Prezados,</p><p>Segue em anexo o relatório de acompanhamento detalhando os chamados referentes à <b>${ssCode}</b> entregues no mês de <b>${monthLow} de ${year}</b>.</p><p>Caso tenha qualquer dúvida ou necessite de informações adicionais, estamos à disposição.</p>`;
-
-        result.value = { pdfBytes, filename };
-        parsedInfo.value = {
-          company, month, year, monthName, ssCode, filename,
-          pages: selectedPages.map(p => ({
-            label: p.context === 'nao_finalizado' ? 'Não Finalizados' : 'Fechados',
-            file: files.value[p.fileIdx].name,
-            page: p.pageIdx + 1,
-            items: p.dataCount
-          }))
-        };
-        addLog('✓ Concluído!');
-
-      } catch (e) {
-        error.value = e.message || 'Erro inesperado ao processar.';
-      } finally {
-        processing.value = false;
+        return { context, company, month, year, dataCount, isEmpty, flat };
       }
-    }
 
-    function addLog(msg) { log.value.push(msg); }
+      const { createApp, ref, computed } = Vue;
 
-    function downloadPdf() {
-      if (!result.value) return;
-      const blob = new Blob([result.value.pdfBytes], { type: 'application/pdf' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url; a.download = result.value.filename;
-      a.click(); URL.revokeObjectURL(url);
-    }
+      createApp({
+        setup() {
+          const files = ref([]);
+          const ssNumber = ref("");
+          const processing = ref(false);
+          const result = ref(null);
+          const emailText = ref("");
+          const emailHtmlVal = ref("");
+          const noDemands = ref(false);
+          const parsedInfo = ref(null);
+          const error = ref("");
+          const emailCopied = ref(false);
+          const isDragOver = ref(false);
+          const log = ref([]);
 
-    async function copyEmail() {
-      try {
-        const htmlBlob  = new Blob([emailHtmlVal.value], { type: 'text/html' });
-        const textBlob  = new Blob([emailText.value],    { type: 'text/plain' });
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob })
-        ]);
-      } catch {
-        await navigator.clipboard.writeText(emailText.value);
-      }
-      emailCopied.value = true;
-      setTimeout(() => emailCopied.value = false, 2000);
-    }
+          function addFiles(list) {
+            for (const f of list) {
+              if (
+                f.type === "application/pdf" &&
+                !files.value.find((x) => x.name === f.name)
+              ) {
+                files.value.push(f);
+              }
+            }
+          }
+          function removeFile(i) {
+            files.value.splice(i, 1);
+          }
+          function onDrop(e) {
+            e.preventDefault();
+            isDragOver.value = false;
+            addFiles(e.dataTransfer.files);
+          }
+          function onFileInput(e) {
+            addFiles(e.target.files);
+            e.target.value = "";
+          }
 
-    return {
-      files, ssNumber, processing, result, emailText, emailHtmlVal, noDemands, parsedInfo,
-      error, emailCopied, isDragOver, log,
-      addFiles, removeFile, onDrop, onFileInput,
-      processFiles, downloadPdf, copyEmail
-    };
-  },
+          async function processFiles() {
+            error.value = "";
+            result.value = null;
+            emailText.value = "";
+            emailHtmlVal.value = "";
+            noDemands.value = false;
+            parsedInfo.value = null;
+            log.value = [];
 
-  template: `
+            if (!files.value.length) {
+              error.value = "Adicione ao menos um arquivo PDF.";
+              return;
+            }
+            if (!ssNumber.value.trim()) {
+              error.value = "Informe o número da SS.";
+              return;
+            }
+
+            processing.value = true;
+            try {
+              addLog("Lendo arquivos PDF…");
+              const allCandidates = [];
+
+              const pdfDataArr = [];
+              for (let fi = 0; fi < files.value.length; fi++) {
+                addLog(`Processando: ${files.value[fi].name}`);
+                const { arrayBuffer, pages } = await extractAllPages(
+                  files.value[fi],
+                );
+                pdfDataArr.push({ arrayBuffer, name: files.value[fi].name });
+                for (const pg of pages) {
+                  const meta = parsePage(pg.text);
+                  if (!meta.isEmpty) {
+                    allCandidates.push({
+                      fileIdx: fi,
+                      pageIdx: pg.index,
+                      ...meta,
+                      arrayBuffer,
+                    });
+                    addLog(
+                      `  ↳ Pág. ${pg.index + 1}: contexto=${meta.context || "?"} | chamados=${meta.dataCount} | empresa=${meta.company || "?"}`,
+                    );
+                  } else {
+                    addLog(
+                      `  ↳ Pág. ${pg.index + 1} ignorada (sem dados, ${pg.text.replace(/\s+/g, "").length} chars)`,
+                    );
+                  }
+                }
+              }
+
+              if (!allCandidates.length)
+                throw new Error(
+                  "Nenhuma página com dados encontrada nos PDFs.",
+                );
+
+              const noCtx = allCandidates.filter((c) => !c.context);
+              if (noCtx.length && allCandidates.every((c) => !c.context)) {
+                const debugText = noCtx
+                  .map(
+                    (c, i) =>
+                      `[Pág ${c.pageIdx + 1}]:\n${c.flat?.slice(0, 300)}`,
+                  )
+                  .join("\n\n");
+                throw new Error(
+                  `Contexto não identificado. Texto extraído (primeiros 300 chars por pág):\n\n${debugText}`,
+                );
+              }
+
+              const company =
+                allCandidates.find((c) => c.company)?.company || "EMPRESA";
+              const month = allCandidates.find((c) => c.month)?.month || 1;
+              const year =
+                allCandidates.find((c) => c.year)?.year ||
+                new Date().getFullYear();
+              const monthName = MONTHS_PT[month - 1];
+              const ssNum = String(ssNumber.value).padStart(3, "0");
+              const ssCode = `SS-CTNI-0534-2021.00-${ssNum}-${year}`;
+              const companyDisplay = mapCompanyName(company).replace(/_/g, " ");
+              addLog(`Empresa: ${company} | Mês: ${monthName} | Ano: ${year}`);
+
+              const totalDemands = allCandidates.reduce(
+                (s, c) => s + c.dataCount,
+                0,
+              );
+              if (totalDemands === 0) {
+                addLog(
+                  "Nenhuma demanda encontrada — gerando apenas e-mail de ausência.",
+                );
+                const monthLow = monthName.toLowerCase();
+                emailText.value = `Prezados,\n\nNeste mês de ${monthLow} de ${year}, não houve atuação em demandas da ${companyDisplay} referentes à ${ssCode}, pois todas as demandas anteriores foram finalizadas e não foram abertos novos incidentes.\n\nCaso tenha qualquer dúvida ou necessite de informações adicionais, estamos à disposição.`;
+                emailHtmlVal.value = `<p>Prezados,</p><p>Neste mês de <b>${monthLow} de ${year}</b>, não houve atuação em demandas da <b>${companyDisplay}</b> referentes à <b>${ssCode}</b>, pois todas as demandas anteriores foram finalizadas e não foram abertos novos incidentes.</p><p>Caso tenha qualquer dúvida ou necessite de informações adicionais, estamos à disposição.</p>`;
+                parsedInfo.value = {
+                  company,
+                  month,
+                  year,
+                  monthName,
+                  ssCode,
+                  companyDisplay,
+                  pages: [],
+                };
+                noDemands.value = true;
+                addLog("✓ Concluído!");
+                return;
+              }
+
+              function bestOfContext(ctx) {
+                const candidates = allCandidates.filter(
+                  (c) => c.context === ctx,
+                );
+                if (!candidates.length) return null;
+                return candidates.reduce((a, b) =>
+                  a.dataCount >= b.dataCount ? a : b,
+                );
+              }
+
+              const naoFinalizado = bestOfContext("nao_finalizado");
+              const fechado = bestOfContext("fechado");
+
+              const selectedPages = [naoFinalizado, fechado].filter(Boolean);
+              if (!selectedPages.length)
+                throw new Error(
+                  "Não foram encontradas páginas com contexto identificável.",
+                );
+
+              addLog(
+                `Páginas selecionadas: ${selectedPages.map((p) => (p.context === "nao_finalizado" ? "Não Finalizados" : "Fechados")).join(" + ")}`,
+              );
+
+              addLog("Montando PDF de saída…");
+              const { PDFDocument } = PDFLib;
+              const outDoc = await PDFDocument.create();
+
+              for (const pg of selectedPages) {
+                const srcDoc = await PDFDocument.load(pg.arrayBuffer);
+                const [copied] = await outDoc.copyPages(srcDoc, [pg.pageIdx]);
+                outDoc.addPage(copied);
+                addLog(
+                  `  ↳ Adicionada: ${pg.context === "nao_finalizado" ? "Não Finalizados" : "Fechados"} (arquivo ${pg.fileIdx + 1}, pág. ${pg.pageIdx + 1})`,
+                );
+              }
+
+              const pdfBytes = await outDoc.save();
+
+              const cleanCo = mapCompanyName(company);
+              const filename = `Relatorio-${cleanCo}-${monthName}_${year}.pdf`;
+
+              const monthLow = monthName.toLowerCase();
+              emailText.value = `Prezados,\n\nSegue em anexo o relatório de acompanhamento detalhando os chamados referentes à ${ssCode} entregues no mês de ${monthLow} de ${year}.\n\nCaso tenha qualquer dúvida ou necessite de informações adicionais, estamos à disposição.`;
+              emailHtmlVal.value = `<p>Prezados,</p><p>Segue em anexo o relatório de acompanhamento detalhando os chamados referentes à <b>${ssCode}</b> entregues no mês de <b>${monthLow} de ${year}</b>.</p><p>Caso tenha qualquer dúvida ou necessite de informações adicionais, estamos à disposição.</p>`;
+
+              result.value = { pdfBytes, filename };
+              parsedInfo.value = {
+                company,
+                month,
+                year,
+                monthName,
+                ssCode,
+                filename,
+                pages: selectedPages.map((p) => ({
+                  label:
+                    p.context === "nao_finalizado"
+                      ? "Não Finalizados"
+                      : "Fechados",
+                  file: files.value[p.fileIdx].name,
+                  page: p.pageIdx + 1,
+                  items: p.dataCount,
+                })),
+              };
+              addLog("✓ Concluído!");
+            } catch (e) {
+              error.value = e.message || "Erro inesperado ao processar.";
+            } finally {
+              processing.value = false;
+            }
+          }
+
+          function addLog(msg) {
+            log.value.push(msg);
+          }
+
+          function downloadPdf() {
+            if (!result.value) return;
+            const blob = new Blob([result.value.pdfBytes], {
+              type: "application/pdf",
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = result.value.filename;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+
+          async function copyEmail() {
+            try {
+              const htmlBlob = new Blob([emailHtmlVal.value], {
+                type: "text/html",
+              });
+              const textBlob = new Blob([emailText.value], {
+                type: "text/plain",
+              });
+              await navigator.clipboard.write([
+                new ClipboardItem({
+                  "text/html": htmlBlob,
+                  "text/plain": textBlob,
+                }),
+              ]);
+            } catch {
+              await navigator.clipboard.writeText(emailText.value);
+            }
+            emailCopied.value = true;
+            setTimeout(() => (emailCopied.value = false), 2000);
+          }
+
+          return {
+            files,
+            ssNumber,
+            processing,
+            result,
+            emailText,
+            emailHtmlVal,
+            noDemands,
+            parsedInfo,
+            error,
+            emailCopied,
+            isDragOver,
+            log,
+            addFiles,
+            removeFile,
+            onDrop,
+            onFileInput,
+            processFiles,
+            downloadPdf,
+            copyEmail,
+          };
+        },
+
+        template: `
   <div class="py-8 px-4" style="position:relative;z-index:1;">
 
     <!-- Header -->
     <div class="max-w-2xl mx-auto mb-10 text-center">
-      <div class="mono text-xs tracking-widest mb-3" style="color:var(--amber);opacity:.7;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:20px;padding:3px 12px;margin-bottom:10px;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--amber);text-transform:uppercase;">
+        <span style="width:5px;height:5px;border-radius:50%;background:var(--amber);animation:badge-pulse 2s infinite;flex-shrink:0;display:inline-block;"></span>
+        Aiyra · Gerador
+      </div>
+      <div class="mono text-xs tracking-widest mb-3" style="color:#475569;">
         AXIA ENERGIA · SUSTENTAÇÃO
       </div>
       <h1 class="mono font-semibold text-2xl mb-2" style="color:var(--text);letter-spacing:-.01em;">
@@ -777,8 +1066,8 @@ createApp({
     </div>
 
   </div>
-  `
-}).mount('#app');
-</script>
-</body>
+  `,
+      }).mount("#app");
+    </script>
+  </body>
 </html>
