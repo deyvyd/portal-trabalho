@@ -14,6 +14,10 @@
     {
       "source": "/aiyra/docgen/:path*",
       "destination": "https://gerador-de-documentacoes-production.up.railway.app/:path*"
+    },
+    {
+      "source": "/static/:path*",
+      "destination": "https://gerador-de-documentacoes-production.up.railway.app/static/:path*"
     }
   ]
 }
