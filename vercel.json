@@ -4,6 +4,14 @@
   ],
   "rewrites": [
     {
+      "source": "/aiyra/docgen",
+      "destination": "https://gerador-de-documentacoes-production.up.railway.app/"
+    },
+    {
+      "source": "/aiyra/docgen/",
+      "destination": "https://gerador-de-documentacoes-production.up.railway.app/"
+    },
+    {
       "source": "/aiyra/docgen/:path*",
       "destination": "https://gerador-de-documentacoes-production.up.railway.app/:path*"
     }
