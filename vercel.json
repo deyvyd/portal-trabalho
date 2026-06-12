@@ -18,6 +18,18 @@
     {
       "source": "/static/:path*",
       "destination": "https://gerador-de-documentacoes-production.up.railway.app/static/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://gerador-de-documentacoes-production.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/gerar_documentos/:path*",
+      "destination": "https://gerador-de-documentacoes-production.up.railway.app/gerar_documentos/:path*"
+    },
+    {
+      "source": "/gerar_documentos",
+      "destination": "https://gerador-de-documentacoes-production.up.railway.app/gerar_documentos"
     }
   ]
 }
