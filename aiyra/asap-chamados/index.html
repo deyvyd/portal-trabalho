@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet" />
 
     <style>
       :root {
@@ -29,7 +31,7 @@
       body {
         background: var(--bg);
         color: var(--text);
-        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-family: 'DM Sans', 'Segoe UI', sans-serif;
         min-height: 100vh;
       }
 
@@ -41,16 +43,37 @@
       }
 
       /* Blobs */
+      /* Pulse rings — Chamados urgency identity */
+      .blob-pulse-ring {
+        position: fixed; top: 60px; right: 60px;
+        width: 300px; height: 300px; border-radius: 50%;
+        border: 1px solid rgba(56,189,248,.08);
+        pointer-events: none; z-index: 0;
+        animation: ring-expand 4s ease-out infinite;
+      }
+      .blob-pulse-ring-2 {
+        position: fixed; top: 30px; right: 30px;
+        width: 360px; height: 360px; border-radius: 50%;
+        border: 1px solid rgba(56,189,248,.05);
+        pointer-events: none; z-index: 0;
+        animation: ring-expand 4s ease-out infinite .8s;
+      }
+      @keyframes ring-expand {
+        0%   { transform: scale(.85); opacity: 0; }
+        20%  { opacity: 1; }
+        100% { transform: scale(1.15); opacity: 0; }
+      }
+
       .blob-1 {
         position: fixed; top: -120px; right: -120px;
         width: 500px; height: 500px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(167,139,250,.1) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(167,139,250,.12) 0%, transparent 70%);
         pointer-events: none; z-index: 0;
       }
       .blob-2 {
         position: fixed; bottom: -100px; left: -100px;
         width: 400px; height: 400px; border-radius: 50%;
-        background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(56,189,248,.1) 0%, transparent 70%);
         pointer-events: none; z-index: 0;
       }
 
@@ -108,10 +131,14 @@
       }
       @keyframes badge-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
       .tool-hero-title {
-        font-size: 2rem; font-weight: 900; color: var(--text);
+        font-size: 2rem; font-weight: 800; color: var(--text);
         margin-bottom: 6px; line-height: 1.1;
+        font-family: 'DM Sans', sans-serif;
       }
-      .tool-hero-title .accent { color: var(--accent); }
+      .tool-hero-title .accent {
+        color: var(--accent);
+        text-shadow: 0 0 24px rgba(56,189,248,.35);
+      }
       .tool-hero-subtitle { font-size: 13px; color: var(--dim); margin-bottom: 32px; }
 
       /* App wrapper */
@@ -126,6 +153,7 @@
       .bg-gray-800 {
         background: rgba(10,15,28,.9) !important;
         border: 1px solid var(--border) !important;
+        border-top: 1px solid var(--border-acc) !important;
         box-shadow: 0 4px 32px rgba(0,0,0,.35) !important;
       }
       /* Card hover (accordion headers) */
@@ -165,14 +193,14 @@
         color: #e2e8f0 !important;
         border-radius: 8px !important;
         transition: border-color .2s, box-shadow .2s !important;
-        font-family: 'Segoe UI', system-ui !important;
+        font-family: 'DM Sans', sans-serif !important;
       }
       input[type="text"]:focus,
       input[type="url"]:focus,
       input[type="date"]:focus,
       select:focus {
         border-color: var(--accent) !important;
-        box-shadow: 0 0 0 3px rgba(56,189,248,.12) !important;
+        box-shadow: 0 0 0 3px rgba(56,189,248,.12), 0 0 12px rgba(56,189,248,.08) !important;
         outline: none !important;
         background: rgba(255,255,255,.06) !important;
       }
@@ -251,6 +279,8 @@
   <body>
     <div class="blob-1"></div>
     <div class="blob-2"></div>
+    <div class="blob-pulse-ring"></div>
+    <div class="blob-pulse-ring-2"></div>
 
     <!-- Portal nav -->
     <nav class="portal-nav">

@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet" />
 
     <style>
       :root {
@@ -29,7 +31,7 @@
       body {
         background: var(--bg);
         color: var(--text);
-        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-family: 'JetBrains Mono', 'Segoe UI', monospace;
         min-height: 100vh;
       }
 
@@ -40,17 +42,30 @@
         background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
       }
 
+      /* Scanlines — DevSecOps terminal identity */
+      body::after {
+        content: '';
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(52,211,153,.012) 3px,
+          rgba(52,211,153,.012) 4px
+        );
+      }
+
       /* Blobs */
       .blob-1 {
         position: fixed; top: -120px; right: -120px;
         width: 500px; height: 500px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(52,211,153,.07) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(52,211,153,.13) 0%, transparent 70%);
         pointer-events: none; z-index: 0;
       }
       .blob-2 {
         position: fixed; bottom: -100px; left: -100px;
         width: 400px; height: 400px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(167,139,250,.08) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(167,139,250,.1) 0%, transparent 70%);
         pointer-events: none; z-index: 0;
       }
 
@@ -108,10 +123,14 @@
       }
       @keyframes badge-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
       .tool-hero-title {
-        font-size: 2rem; font-weight: 900; color: var(--text);
+        font-size: 2rem; font-weight: 800; color: var(--text);
         margin-bottom: 6px; line-height: 1.1;
+        font-family: 'JetBrains Mono', monospace;
       }
-      .tool-hero-title .accent { color: var(--accent); }
+      .tool-hero-title .accent {
+        color: var(--accent);
+        text-shadow: 0 0 24px rgba(52,211,153,.35);
+      }
       .tool-hero-subtitle { font-size: 13px; color: var(--dim); margin-bottom: 32px; }
 
       /* App wrapper */
@@ -124,6 +143,7 @@
       .bg-gray-800 {
         background: rgba(10,15,28,.9) !important;
         border: 1px solid var(--border) !important;
+        border-top: 1px solid var(--border-acc) !important;
         box-shadow: 0 4px 32px rgba(0,0,0,.35) !important;
       }
       .hover\:bg-gray-750:hover,
@@ -162,14 +182,14 @@
         color: #e2e8f0 !important;
         border-radius: 8px !important;
         transition: border-color .2s, box-shadow .2s !important;
-        font-family: 'Segoe UI', system-ui !important;
+        font-family: 'JetBrains Mono', monospace !important;
       }
       input[type="text"]:focus,
       input[type="url"]:focus,
       input[type="date"]:focus,
       select:focus {
         border-color: var(--accent) !important;
-        box-shadow: 0 0 0 3px rgba(52,211,153,.12) !important;
+        box-shadow: 0 0 0 3px rgba(52,211,153,.12), 0 0 12px rgba(52,211,153,.08) !important;
         outline: none !important;
         background: rgba(255,255,255,.06) !important;
       }
