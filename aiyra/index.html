@@ -6,6 +6,13 @@
 <title>Aiyra — Ferramentas · Deyvyd Moura</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23a78bfa'/><stop offset='1' stop-color='%2322d3ee'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='%23080b14'/><path d='M12 13 L12 10 Q12 8 14 8 L18 8 Q20 8 20 10 L20 13' fill='none' stroke='url(%23g)' stroke-width='2.2' stroke-linecap='round'/><rect x='5' y='13' width='22' height='13' rx='2.5' fill='url(%23g)'/><rect x='5' y='18.5' width='22' height='2' fill='%23080b14' opacity='.25'/><rect x='14' y='17.5' width='4' height='3' rx='1' fill='%23080b14' opacity='.5'/></svg>" />
 <link rel="stylesheet" href="../assets/style.css">
+<style>
+  .lang-toggle { display: flex; align-items: center; gap: 4px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  .lang-toggle a { color: #64748b; text-decoration: none; transition: color .2s; }
+  .lang-toggle a:hover { color: #a78bfa; }
+  .lang-toggle .lang-active { color: #e2e8f0; font-weight: 600; pointer-events: none; }
+  .lang-sep { color: #334155; }
+</style>
 </head>
 <body>
 <div class="blob-1"></div>
@@ -13,9 +20,10 @@
 
 <div class="page">
   <nav>
-    <div class="nav-brand">
+    <div class="nav-brand" id="nav-brand">
       ferramentas<span class="nav-dot"></span><span>deyvyd moura</span>
     </div>
+    <div class="lang-toggle" id="lang-toggle"></div>
   </nav>
 
   <div class="hero">
@@ -23,34 +31,34 @@
       <div class="dot"></div>
       <span>Aiyra</span>
     </div>
-    <h1>Ferramentas que<br><span class="grad">aceleram o trabalho.</span></h1>
-    <p class="hero-sub">Automação e produtividade para o dia a dia.</p>
+    <h1 id="hero-title"></h1>
+    <p class="hero-sub" id="hero-sub"></p>
   </div>
 
   <a href="https://docgen.ferramentas.deyvyd.com" class="featured">
     <div>
-      <div class="featured-badge">Principal</div>
+      <div class="featured-badge" id="badge-featured"></div>
       <div class="featured-title"><span class="grad">Docgen</span></div>
-      <div class="featured-desc">Geração automática de documentação técnica e de desenvolvimento.</div>
+      <div class="featured-desc" id="docgen-desc"></div>
     </div>
-    <div class="btn-open">Abrir →</div>
+    <div class="btn-open" id="btn-open"></div>
   </a>
 
-  <div class="section-label">Outras ferramentas</div>
+  <div class="section-label" id="section-other"></div>
   <div class="tools-grid">
     <a href="/aiyra/gerador-relatorio-sustentacao/" class="tool-card">
-      <div class="tool-name">Gerador de Relatório</div>
-      <div class="tool-desc">Relatório de sustentação</div>
+      <div class="tool-name" id="tool-report-name"></div>
+      <div class="tool-desc" id="tool-report-desc"></div>
       <span class="tool-arrow">→</span>
     </a>
     <a href="/aiyra/asap-chamados/" class="tool-card">
       <div class="tool-name">ASAP Chamados</div>
-      <div class="tool-desc">Gestão de chamados</div>
+      <div class="tool-desc" id="tool-chamados-desc"></div>
       <span class="tool-arrow">→</span>
     </a>
     <a href="/aiyra/asap-devsecops/" class="tool-card">
       <div class="tool-name">ASAP DevSecOps</div>
-      <div class="tool-desc">Segurança e operações</div>
+      <div class="tool-desc" id="tool-devsecops-desc"></div>
       <span class="tool-arrow">→</span>
     </a>
   </div>
@@ -61,5 +69,70 @@
     <span class="footer-name">2026</span>
   </footer>
 </div>
+
+<script>
+  var PT_HOST = 'ferramentas.deyvyd.com';
+  var EN_HOST = 'tools.deyvyd.com';
+
+  var i18n = {
+    pt: {
+      title: 'Ferramentas que<br><span class="grad">aceleram o trabalho.</span>',
+      sub: 'Automação e produtividade para o dia a dia.',
+      badgeFeatured: 'Principal',
+      docgenDesc: 'Geração automática de documentação técnica e de desenvolvimento.',
+      btnOpen: 'Abrir →',
+      sectionOther: 'Outras ferramentas',
+      toolReportName: 'Gerador de Relatório',
+      toolReportDesc: 'Relatório de sustentação',
+      toolChamadosDesc: 'Gestão de chamados',
+      toolDevsecopsDesc: 'Segurança e operações',
+    },
+    en: {
+      title: 'Tools that<br><span class="grad">accelerate the work.</span>',
+      sub: 'Automation and productivity for every day.',
+      badgeFeatured: 'Featured',
+      docgenDesc: 'Automatic generation of technical and development documentation.',
+      btnOpen: 'Open →',
+      sectionOther: 'Other tools',
+      toolReportName: 'Report Generator',
+      toolReportDesc: 'Support report',
+      toolChamadosDesc: 'Ticket management',
+      toolDevsecopsDesc: 'Security and operations',
+    }
+  };
+
+  function detectLang() {
+    var host = location.hostname;
+    if (host === EN_HOST) return 'en';
+    if (host === PT_HOST) return 'pt';
+    // local dev: use browser lang
+    return navigator.language.startsWith('pt') ? 'pt' : 'en';
+  }
+
+  function render(lang) {
+    var t = i18n[lang];
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.getElementById('hero-title').innerHTML = t.title;
+    document.getElementById('hero-sub').textContent = t.sub;
+    document.getElementById('badge-featured').textContent = t.badgeFeatured;
+    document.getElementById('docgen-desc').textContent = t.docgenDesc;
+    document.getElementById('btn-open').textContent = t.btnOpen;
+    document.getElementById('section-other').textContent = t.sectionOther;
+    document.getElementById('tool-report-name').textContent = t.toolReportName;
+    document.getElementById('tool-report-desc').textContent = t.toolReportDesc;
+    document.getElementById('tool-chamados-desc').textContent = t.toolChamadosDesc;
+    document.getElementById('tool-devsecops-desc').textContent = t.toolDevsecopsDesc;
+
+    var otherLang = lang === 'pt' ? 'en' : 'pt';
+    var otherHost = lang === 'pt' ? EN_HOST : PT_HOST;
+    var otherHref = 'https://' + otherHost + '/aiyra/';
+    document.getElementById('lang-toggle').innerHTML =
+      '<span class="lang-active">' + lang.toUpperCase() + '</span>' +
+      '<span class="lang-sep">/</span>' +
+      '<a href="' + otherHref + '">' + otherLang.toUpperCase() + '</a>';
+  }
+
+  render(detectLang());
+</script>
 </body>
 </html>

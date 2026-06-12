@@ -2,8 +2,23 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=/aiyra/">
 <title>Redirecionando…</title>
+<script>
+  (function () {
+    var PT_HOST = 'ferramentas.deyvyd.com';
+    var EN_HOST = 'tools.deyvyd.com';
+    var host = location.hostname;
+    var prefersPT = navigator.language.startsWith('pt');
+
+    if (host === PT_HOST && !prefersPT) {
+      location.replace('https://' + EN_HOST + '/aiyra/');
+    } else if (host === EN_HOST && prefersPT) {
+      location.replace('https://' + PT_HOST + '/aiyra/');
+    } else {
+      location.replace('/aiyra/');
+    }
+  })();
+</script>
 </head>
 <body>
 <a href="/aiyra/">Acessar portal</a>
