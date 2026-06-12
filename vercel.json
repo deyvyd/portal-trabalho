@@ -1,35 +1,5 @@
 {
   "redirects": [
     { "source": "/", "destination": "/aiyra/", "permanent": true }
-  ],
-  "rewrites": [
-    {
-      "source": "/aiyra/docgen",
-      "destination": "https://gerador-de-documentacoes-production.up.railway.app/"
-    },
-    {
-      "source": "/aiyra/docgen/",
-      "destination": "https://gerador-de-documentacoes-production.up.railway.app/"
-    },
-    {
-      "source": "/aiyra/docgen/:path*",
-      "destination": "https://gerador-de-documentacoes-production.up.railway.app/:path*"
-    },
-    {
-      "source": "/static/:path*",
-      "destination": "https://gerador-de-documentacoes-production.up.railway.app/static/:path*"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "https://gerador-de-documentacoes-production.up.railway.app/api/:path*"
-    },
-    {
-      "source": "/gerar_documentos/:path*",
-      "destination": "https://gerador-de-documentacoes-production.up.railway.app/gerar_documentos/:path*"
-    },
-    {
-      "source": "/gerar_documentos",
-      "destination": "https://gerador-de-documentacoes-production.up.railway.app/gerar_documentos"
-    }
   ]
 }
